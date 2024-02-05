@@ -65,6 +65,15 @@ Date: **02/02/2024**
 - [ ] High level design
 - [ ] Better phrase the project plan
 
+Date: **05/02/2024**
+
+- Finalising the project plan and the high level design.
+- Deciding on the which GUI application to use.
+   
+Date: **06/02/2024**
+
+- Setting up libgdx
+- Start on the implementation of the code for the cells in the board.
 
 
 
