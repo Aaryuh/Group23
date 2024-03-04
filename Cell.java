@@ -4,7 +4,7 @@ public class Cell {
 
     private int cellNumber;
 
-    private enum situation {EMPTY, ATOM, INFLUENCE, DOUBLE_INFLUENCE, TRIPLE_INFLUENCE};
+    public enum situation {EMPTY, ATOM, INFLUENCE, DOUBLE_INFLUENCE, TRIPLE_INFLUENCE};
 
     public enum edgeDirection{TR, R, BR, BL, L, TL};
 
@@ -41,30 +41,45 @@ public class Cell {
     public ArrayList<Cell> getNeighbour_cells() {
         return neighbour_cells;
     }
-    Cell trueNeighbour;
-    edgeDirection exitPoint;//this is the exitEdge of the ray entered
-    public Cell rayEntryAndExit(edgeDirection inputEdge) {
+    
+    Cell currentNeighbour;
+    public edgeDirection exitEdge; //this is the exitEdge of the ray that entered this cell
+    
+    public Cell rayEntryAndExit(edgeDirection inputEdge) { //this function will return the cell where the ray will enter and exit
 
-        exitPoint= exitEdge(inputEdge);//gives the exit edge type
-
-        int edgeNeighbourNumber= neighbourNumber(inputEdge);//gets neighbour NUMBER based on the input edge -- sahi hai
-
-        if( getNeighbour_cells().get(edgeNeighbourNumber)== null){
-            return trueNeighbour;
+        if(this.getCell_situation() == situation.ATOM){ // Special case - If the first Cell has an atom
+            Cell dummy = new Cell();
+            dummy.setCellNumber(this.cellNumber);
+            dummy.exitEdge = this.exitEdge;
+            dummy.setCell_situation(this.getCell_situation());
+            return dummy;
         }
-        trueNeighbour= getNeighbour_cells().get(edgeNeighbourNumber);//gets the neighbour CELL from which the ray will go next.
 
-        edgeDirection nextInputEdge = inputEdge_BasedOn_PreviousExitEdge(exitPoint);
+        exitEdge = getExitEdge(inputEdge); //gives the exit edge type
 
-        if(trueNeighbour.rayEntryAndExit(nextInputEdge)== null){
-            return trueNeighbour;
+        int neighbourIndex = neighbourNumber(inputEdge); //gets neighbour NUMBER based on the input edge type
+
+        if( getNeighbour_cells().get(neighbourIndex) == null){
+            return null;
         }
-        return trueNeighbour.rayEntryAndExit(nextInputEdge);
+
+        currentNeighbour = getNeighbour_cells().get(neighbourIndex); //gets the neighbour CELL from which the ray will go next.
+
+        if(currentNeighbour.getCell_situation() == situation.ATOM){
+            return currentNeighbour;
+        }
+
+        edgeDirection nextInputEdge = nextInputEdge_BasedOn_PreviousExitEdge(exitEdge);
+
+        if(currentNeighbour.rayEntryAndExit(nextInputEdge) == null){
+            return currentNeighbour;
+        }
+        return currentNeighbour.rayEntryAndExit(nextInputEdge);
 
 
-    }
+    } //end of rayEntryAndExit
 
-    public edgeDirection inputEdge_BasedOn_PreviousExitEdge(edgeDirection previousExit){
+    public edgeDirection nextInputEdge_BasedOn_PreviousExitEdge(edgeDirection previousExit){
         switch(previousExit){
             case TR:
                 return edgeDirection.BL;
@@ -104,7 +119,7 @@ public class Cell {
         }
     }
 
-    public edgeDirection exitEdge(edgeDirection inputEdge) {
+    public edgeDirection getExitEdge(edgeDirection inputEdge) {
 
         switch(inputEdge){
             case TR:
