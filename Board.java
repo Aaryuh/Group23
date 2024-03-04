@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class Board {
 
-    public Cell[] cells;
+    private Cell[] cells;
 
     public Board() {
         cells = new Cell[61];
@@ -10,19 +10,21 @@ public class Board {
         makeBoard();
     }
 
-    private void addCells() {
+    public void addCells() {
         for (int i = 0; i < cells.length; i++) {
             cells[i] = new Cell();
             cells[i].setCellNumber(i);
         }
     }
 
-    /*public void  addAtom(int position) {
+    public void addAtom(int position) {
 
         cells[position].setCell_situation(Cell.situation.ATOM);
+        cells[position].setCell_situation(Cell.situation.INFLUENCE);
+        cells[position].setCell_situation(Cell.situation.DOUBLE_INFLUENCE);
+        cells[position].setCell_situation(Cell.situation.TRIPLE_INFLUENCE);
 
-
-    }*/
+    }
 
     private void makeBoard(){
         ArrayList<Cell> dummy = new ArrayList<>();
