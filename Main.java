@@ -28,11 +28,11 @@ public class Main extends Application {
 
     private Random random;
     private ArrayList<Integer> atoms;
-    private int showAtom;
+    private int showAtom; // flag -- if enabled(show atoms) or disabled (hide atoms)
     private Pane hexGridPane; // Store the hexagonal grid pane
     private Board gameBoard;
-    private ArrayList<Button> buttons;
-    private static int rayCount;
+    private ArrayList<Button> buttons; // List of buttons for the edges 0 -> 53
+    private static int rayCount; // Count of the number of rays sent
 
     @Override
     public void start(Stage primaryStage) {
