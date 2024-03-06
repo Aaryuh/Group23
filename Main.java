@@ -92,7 +92,7 @@ public class Main extends Application {
         primaryStage.show();
     } // End of Start
 
-    private void setButtonLocations(ArrayList<HexagonGameGrid.Point> list) {
+    private void setButtonLocations(ArrayList<Main.Point> list) {
 
         list.add(new Point(354.4, 197.6)); // 0
         list.add(new Point(384, 194.4)); // 1
@@ -151,7 +151,7 @@ public class Main extends Application {
 
     } // End of button Locations
 
-    private void setCelllocations(ArrayList<HexagonGameGrid.Point> list) {
+    private void setCelllocations(ArrayList<Main.Point> list) {
 
         list.add(new Point(372,225.6)); // 0
         list.add(new Point(441.6,225.6)); // 1
