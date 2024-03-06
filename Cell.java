@@ -104,6 +104,44 @@ public class Cell {
         return currentCell;
     }
 
+    public ArrayList<Integer> rayPath(edgeDirection inputEdge){ //returns the path of the ray
+
+        ArrayList<Integer> path = new ArrayList<>();
+        path.add(this.getCellNumber());
+
+        if(this.getCell_situation() == situation.ATOM) return path;
+
+        edgeDirection currentEdge = inputEdge;
+        Cell currentCell = this;
+
+        while(true){
+            if(!path.contains(currentCell.getCellNumber())) path.add(currentCell.cellNumber);
+
+            if(currentCell == null) break;
+
+            if(currentCell.getCell_situation() == situation.ATOM){
+                break;
+            }
+            else if(currentCell.getCell_situation() == situation.EMPTY){
+
+                exitEdge = getExitEdge(currentEdge); //gives the exit edge type
+
+                int neighbourIndex = neighbourNumber(currentEdge); //gets neighbour NUMBER based on the input edge type
+
+                if( currentCell.getNeighbour_cells().get(neighbourIndex) == null){
+                    break;
+                }
+
+                currentCell = currentCell.getNeighbour_cells().get(neighbourIndex); //gets the neighbour CELL from which the ray will go next.
+                currentEdge = nextInputEdge_BasedOn_PreviousExitEdge(exitEdge);
+            }
+
+        } // End of while
+
+        return path;
+
+    } // End of rayPath
+
     //method to calculate the next input edge based on the previous exit edge
     public edgeDirection nextInputEdge_BasedOn_PreviousExitEdge(edgeDirection previousExit){
 

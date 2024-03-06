@@ -17,7 +17,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import javax.sound.sampled.Line;
+
 public class Main extends Application {
+
+    private ArrayList<Main.Point> cellLocation;
+    private ArrayList<Main.Point> buttonLocation;
 
     private static final int HEX_RADIUS = 20;
     private static final Layout layout = new Layout(Layout.pointy, new Point(2 * HEX_RADIUS, 2 * HEX_RADIUS), new Point(400, 300));
@@ -33,9 +38,16 @@ public class Main extends Application {
     private Board gameBoard;
     private ArrayList<Button> buttons; // List of buttons for the edges 0 -> 53
     private static int rayCount; // Count of the number of rays sent
+    private Pane rootPane;
 
     @Override
     public void start(Stage primaryStage) {
+
+        cellLocation = new ArrayList<>();
+        setCelllocations(cellLocation);
+        buttonLocation = new ArrayList<>();
+        setButtonLocations(buttonLocation);
+
         rayCount = 0;
         buttons = new ArrayList<>();
         random = new Random();
@@ -70,7 +82,7 @@ public class Main extends Application {
         setRandom.setLayoutY(100);
 
         hexGridPane = createHexGrid(); // Initialize hexagonal grid
-        Pane rootPane = new Pane(hexGridPane); // Create a root pane and add the hex grid to it
+        rootPane = new Pane(hexGridPane); // Create a root pane and add the hex grid to it
         rootPane.getChildren().addAll(button, stopShowing, setRandom, gameTitle); // Add the button to the root pane
         setRayButtons(rootPane); // Makes and sets the coordinates for the edge buttons
         setButtonOnAction(); // Set action for each edge button
@@ -79,6 +91,132 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
     } // End of Start
+
+    private void setButtonLocations(ArrayList<HexagonGameGrid.Point> list) {
+
+        list.add(new Point(354.4, 197.6)); // 0
+        list.add(new Point(384, 194.4)); // 1
+        list.add(new Point(424.8, 197.6)); // 2
+        list.add(new Point(453.6,193.6)); // 3
+        list.add(new Point(493.6,197.6)); // 4
+        list.add(new Point(524.8,195.2)); // 5
+        list.add(new Point(560.8,199.2)); // 6
+        list.add(new Point(592.8,193.6)); // 7
+        list.add(new Point(631.2,197.6)); // 8
+        list.add(new Point(661.6,192.8)); // 9
+        list.add(new Point(682.4,222.4)); // 10
+        list.add(new Point(698.4,255.2)); // 11
+        list.add(new Point(716.8,283.2)); // 12
+        list.add(new Point(733.6,314.4)); // 13
+        list.add(new Point(752,342.4)); // 14
+        list.add(new Point(768,373.6)); // 15
+        list.add(new Point(785.8,399.2)); // 16
+        list.add(new Point(803.2,436)); // 17
+        list.add(new Point(820,464)); // 18
+        list.add(new Point(802.4,493.6)); // 19
+        list.add(new Point(784.8,525.6)); // 20
+        list.add(new Point(768.8,552)); // 21
+        list.add(new Point(751.2,585.6)); // 22
+        list.add(new Point(738.4,610.4)); // 23
+        list.add(new Point(716,644.8)); // 24
+        list.add(new Point(702.4,670.4)); // 25
+        list.add(new Point(683.2,707.2)); // 26
+        list.add(new Point(669.6,730.4)); // 27
+        list.add(new Point(634.4,732)); // 28
+        list.add(new Point(598.4,731.2)); // 29
+        list.add(new Point(560.8,730.4)); // 30
+        list.add(new Point(528,732.8)); // 31
+        list.add(new Point(495.2,732)); // 32
+        list.add(new Point(459.2,732.8)); // 33
+        list.add(new Point(426.4,731.2)); // 34
+        list.add(new Point(390.4,732.8)); // 35
+        list.add(new Point(353.6,730.4)); // 36
+        list.add(new Point(339.2,704.8)); // 37
+        list.add(new Point(318.4,669.6)); // 38
+        list.add(new Point(304.8,643.2)); // 39
+        list.add(new Point(280,608.8)); // 40
+        list.add(new Point(270.4,584)); // 41
+        list.add(new Point(252.8,552)); // 42
+        list.add(new Point(235.2,521.6)); // 43
+        list.add(new Point(216.8,491.2)); // 44
+        list.add(new Point(200.8,466.4)); // 45
+        list.add(new Point(217.6,436)); // 46
+        list.add(new Point(236,404)); // 47
+        list.add(new Point(249.6,376)); // 48
+        list.add(new Point(270.4,343.2)); // 49
+        list.add(new Point(288.8,315.2)); // 50
+        list.add(new Point(305.6,284.8)); // 51
+        list.add(new Point(321.6,256)); // 52
+        list.add(new Point(339.2,224)); // 53
+
+    } // End of button Locations
+
+    private void setCelllocations(ArrayList<HexagonGameGrid.Point> list) {
+
+        list.add(new Point(372,225.6)); // 0
+        list.add(new Point(441.6,225.6)); // 1
+        list.add(new Point(512,225.6)); // 2
+        list.add(new Point(580,225.6)); // 3
+        list.add(new Point(649.6,225.6)); // 4
+        list.add(new Point(336,284)); // 5
+        list.add(new Point(406.4,284)); // 6
+        list.add(new Point(476,284)); // 7
+        list.add(new Point(545.6,284)); // 8
+        list.add(new Point(615.2,284)); // 9
+        list.add(new Point(685.6,284)); // 10
+        list.add(new Point(301.6,344)); // 11
+        list.add(new Point(371.2,344)); // 12
+        list.add(new Point(441.6,344)); // 13
+        list.add(new Point(512,344)); // 14
+        list.add(new Point(580,344)); // 15
+        list.add(new Point(649.6,344)); // 16
+        list.add(new Point(718.4,344)); // 17
+        list.add(new Point(268,405.6)); // 18
+        list.add(new Point(335.2,405.6)); // 19
+        list.add(new Point(407.2,405.6)); // 20
+        list.add(new Point(476,405.6)); // 21
+        list.add(new Point(544,405.6)); // 22
+        list.add(new Point(614.4,405.6)); // 23
+        list.add(new Point(684,405.6)); // 24
+        list.add(new Point(755.2,405.6)); // 25
+        list.add(new Point(232,463.2)); // 26 ------------- 5th row
+        list.add(new Point(304,463.2)); // 27
+        list.add(new Point(374.4,463.2)); // 28
+        list.add(new Point(440,463.2)); // 29
+        list.add(new Point(511.2,463.2)); // 30
+        list.add(new Point(581.6,463.2)); // 31
+        list.add(new Point(649.6,463.2)); // 32
+        list.add(new Point(720.8,463.2)); // 33
+        list.add(new Point(790,463.2)); // 34
+        list.add(new Point(268.8,524)); // 35 ------------- 6th row
+        list.add(new Point(338.4,524)); // 36
+        list.add(new Point(405.6,524)); // 37
+        list.add(new Point(476,524)); // 38
+        list.add(new Point(546.4,524)); // 39
+        list.add(new Point(615,524)); // 40
+        list.add(new Point(682.4,524)); // 41
+        list.add(new Point(754.4,524)); // 42
+        list.add(new Point(303.2,582.4)); // 43 ----------- 7th row
+        list.add(new Point(371,582.4)); // 44
+        list.add(new Point(440,582.4)); // 45
+        list.add(new Point(508.8,582.4)); // 46
+        list.add(new Point(582.4,582.4)); // 47
+        list.add(new Point(651,582.4)); // 48
+        list.add(new Point(721.6,582.4)); // 49
+        list.add(new Point(337.6,643.2)); // 50 ----------- 8th row
+        list.add(new Point(408,643.2)); // 51
+        list.add(new Point(473.6,643.2)); // 52
+        list.add(new Point(546.4,643.2)); // 53
+        list.add(new Point(616,643.2)); // 54
+        list.add(new Point(686.4,643.2)); // 55
+        list.add(new Point(372.8,702.4)); // 56 ----------- 9th row
+        list.add(new Point(443.2,702.4)); // 57
+        list.add(new Point(512,702.4)); // 58
+        list.add(new Point(582.4,702.4)); // 59
+        list.add(new Point(652,702.4)); // 60
+
+
+    } // End of setting cell locations
 
     public void setButtonOnAction() { // Assigns the action for each button
         for(int i = 0; i < buttons.size(); i++){
@@ -91,18 +229,39 @@ public class Main extends Application {
         rayCount++; // Increase Count
         buttons.get(num).setDisable(true); // Disable Button
 
-        Cell exitCell = gameBoard.cells[buttonNumberToCellNumber(num)].rayEntryAndExit(buttonNumberToEdge(num));
+        Cell exitCell = gameBoard.cells[buttonNumberToCellNumber(num)].newEntryAndExit(buttonNumberToEdge(num));
+        ArrayList<Integer> path = gameBoard.cells[buttonNumberToCellNumber(num)].rayPath(buttonNumberToEdge(num));
+        System.out.println(path); // path
+
+        Line dash1 = new Line(buttonLocation.get(num).x, buttonLocation.get(num).y,cellLocation.get(path.get(0)).x,cellLocation.get(path.get(0)).y);
+        dash1.setStroke(Color.YELLOW);
+        rootPane.getChildren().add(dash1);
+
+        for(int i = 0; i < path.size()-1; i++){
+            Line dash = new Line(cellLocation.get(path.get(i)).x,cellLocation.get(path.get(i)).y,cellLocation.get(path.get(i+1)).x,cellLocation.get(path.get(i+1)).y);
+            dash.setStroke(Color.YELLOW);
+            rootPane.getChildren().add(dash);
+        }
+
         Result result = new Result(exitCell.getCellNumber(), exitCell.exitEdge);
         result.setSituation(exitCell.getCell_situation());
+
         int exitButtonNumber = findExitButtonNumber(result);
+        if(exitButtonNumber != -1 && result.situation != Cell.situation.ATOM){
+            Line dash2 = new Line(cellLocation.get(path.get(path.size()-1)).x,cellLocation.get(path.get(path.size()-1)).y,buttonLocation.get(exitButtonNumber).x,buttonLocation.get(exitButtonNumber).y);
+            dash2.setStroke(Color.YELLOW);
+            rootPane.getChildren().add(dash2);
+        }
 //        System.out.println(result.situation);
         if(result.situation == Cell.situation.ATOM){
             buttons.get(num).setStyle("-fx-background-color: red");
         }
         else{
             buttons.get(num).setText(""+rayCount);
-            buttons.get(exitButtonNumber).setText(""+rayCount);
-            buttons.get(exitButtonNumber).setDisable(true);
+            if(exitButtonNumber != -1){
+                buttons.get(exitButtonNumber).setText(""+rayCount);
+                buttons.get(exitButtonNumber).setDisable(true);
+            }
         }
 
     }
