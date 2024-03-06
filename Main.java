@@ -4,12 +4,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
+import javafx.scene.transform.Rotate;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
+import javafx.scene.text.Text;
+import javafx.scene.control.Label;
 import javafx.scene.shape.Circle;
 
 import java.util.ArrayList;
@@ -17,12 +19,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import javax.sound.sampled.Line;
+
 
 public class Main extends Application {
 
     private ArrayList<Main.Point> cellLocation;
     private ArrayList<Main.Point> buttonLocation;
+    private Text raysUsed;
 
     private static final int HEX_RADIUS = 20;
     private static final Layout layout = new Layout(Layout.pointy, new Point(2 * HEX_RADIUS, 2 * HEX_RADIUS), new Point(400, 300));
@@ -75,11 +78,11 @@ public class Main extends Application {
         stopShowing.setLayoutX(100);
         stopShowing.setLayoutY(100);
 
-        Button setRandom = new Button("Set Atoms");
+        /*Button setRandom = new Button("Set Atoms");
         setRandom.setMinSize(40, 80);
         setRandom.setOnAction(event -> handleSetClick());
         setRandom.setLayoutX(210);
-        setRandom.setLayoutY(100);
+        setRandom.setLayoutY(100);*/
 
         hexGridPane = createHexGrid(); // Initialize hexagonal grid
         rootPane = new Pane(hexGridPane); // Create a root pane and add the hex grid to it
@@ -227,6 +230,17 @@ public class Main extends Application {
 
     public void handleEdgeButtonClick(int num){ // Performs the assigned action when an edge button is clicked
         rayCount++; // Increase Count
+
+        rootPane.getChildren().remove(raysUsed);
+
+        raysUsed = new Text("Rays Used: "+rayCount);
+        raysUsed.setFont(Font.font(30));
+        raysUsed.setFill(Color.CYAN);
+        raysUsed.setLayoutX(0);
+        raysUsed.setLayoutY(75);
+        raysUsed.setFont(Font.font(raysUsed.getFont().getFamily(), FontWeight.BOLD, raysUsed.getFont().getSize()));
+        rootPane.getChildren().add(raysUsed);
+
         buttons.get(num).setDisable(true); // Disable Button
 
         Cell exitCell = gameBoard.cells[buttonNumberToCellNumber(num)].newEntryAndExit(buttonNumberToEdge(num));
