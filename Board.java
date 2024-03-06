@@ -2,14 +2,17 @@ import java.util.ArrayList;
 
 public class Board {
 
-    private Cell[] cells;
+    //Array to hold individual cells on the board
+    public Cell[] cells;
 
+    //Constructor to initialize the board with 61 cells and set it up
     public Board() {
         cells = new Cell[61];
-        addCells();
-        makeBoard();
+        addCells();   //method to add individual cells to the board
+        makeBoard();  //method to set up the board configuration
     }
 
+    //Add individual cells to the board
     public void addCells() {
         for (int i = 0; i < cells.length; i++) {
             cells[i] = new Cell();
@@ -26,8 +29,11 @@ public class Board {
 
     }
 
+
     private void makeBoard(){
+        //arrayList containing the cells with their specific neighbour
         ArrayList<Cell> dummy = new ArrayList<>();
+
         //     ------------------0------------------
         dummy.add(null);
         dummy.add(cells[1]);
@@ -37,6 +43,7 @@ public class Board {
         dummy.add(null);
         cells[0].setNeighbour_cells(new ArrayList<>(dummy));
         dummy.clear();
+
         //        ---------------1-------------------
         dummy.add(null);
         dummy.add(cells[2]);
@@ -56,6 +63,7 @@ public class Board {
         dummy.add(null);
         cells[2].setNeighbour_cells(new ArrayList<>(dummy));
         dummy.clear();
+
         //        ---------------3-------------------
         dummy.add(null);
         dummy.add(cells[4]);
@@ -65,6 +73,7 @@ public class Board {
         dummy.add(null);
         cells[3].setNeighbour_cells(new ArrayList<>(dummy));
         dummy.clear();
+
         //        ---------------4-------------------
         dummy.add(null);
         dummy.add(null);

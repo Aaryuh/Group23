@@ -2,84 +2,111 @@ import java.util.ArrayList;
 
 public class Cell {
 
-    private int cellNumber;
+    private int cellNumber;  //Unique identifier for the cell
 
-    public enum situation {EMPTY, ATOM, INFLUENCE, DOUBLE_INFLUENCE, TRIPLE_INFLUENCE};
+    //Enum defining possible situation for a cell
+    public enum situation {EMPTY, ATOM, INFLUENCE, DOUBLE_INFLUENCE, TRIPLE_INFLUENCE}
 
-    public enum edgeDirection{TR, R, BR, BL, L, TL};
+    //Enum defining possible edge direction
+    public enum edgeDirection{TR, R, BR, BL, L, TL}
 
+    //current situation of the cell
     private situation cell_situation;
 
+    //List of neighboring cells
     private ArrayList<Cell> neighbour_cells;
 
+    //Constructor to initialize the cell with default values
     public Cell(){
         this.cell_situation = situation.EMPTY;
         this.cellNumber = 0;
         neighbour_cells = new ArrayList<>();
     }
 
+    //Setter for the cell situation
     public void setCell_situation(situation cell_situation) {
         this.cell_situation = cell_situation;
     }
 
+    //Setter for the list of neighboring cells
     public void setNeighbour_cells(ArrayList<Cell> neighbour_cells) {
         this.neighbour_cells = neighbour_cells;
     }
 
+    //getter for the cell number
     public int getCellNumber() {
         return cellNumber;
     }
 
+    //setter for the cell number
     public void setCellNumber(int cellNumber) {
         this.cellNumber = cellNumber;
     }
 
+    //getter for the cell situation
     public situation getCell_situation() {
         return cell_situation;
     }
 
+    //getter for the list of neighboring cells
     public ArrayList<Cell> getNeighbour_cells() {
         return neighbour_cells;
     }
-    
-    Cell currentNeighbour;
-    public edgeDirection exitEdge; //this is the exitEdge of the ray that entered this cell
-    
-    public Cell rayEntryAndExit(edgeDirection inputEdge) { //this function will return the cell where the ray will enter and exit
 
-        if(this.getCell_situation() == situation.ATOM){ // Special case - If the first Cell has an atom
-            Cell dummy = new Cell();
-            dummy.setCellNumber(this.cellNumber);
-            dummy.exitEdge = this.exitEdge;
-            dummy.setCell_situation(this.getCell_situation());
-            return dummy;
+    //Proprieties related to ray tracing
+    Cell currentNeighbour;    //Current neighbour during ray tracing
+    public edgeDirection exitEdge; //exit edge of the ray that entered this cell
+
+    //Method to determine the next cell based on the input edge
+    public Cell newEntryAndExit(edgeDirection inputEdge){
+
+        // Special case - If the first Cell has an atom, return the cell itself
+        if(this.getCell_situation() == situation.ATOM){
+           return this;
         }
 
-        exitEdge = getExitEdge(inputEdge); //gives the exit edge type
+        //entry edge of the ray at the beginning
+        edgeDirection currentEdge = inputEdge;
+        Cell currentCell = this;
 
-        int neighbourIndex = neighbourNumber(inputEdge); //gets neighbour NUMBER based on the input edge type
+        while(true){
+            System.out.println("Cell: " + currentCell.getCellNumber()+"; Cell Situation: " + currentCell.getCell_situation());
 
-        if( getNeighbour_cells().get(neighbourIndex) == null){
-            return null;
-        }
+            if(currentCell == null) {
+                break;
+            }
 
-        currentNeighbour = getNeighbour_cells().get(neighbourIndex); //gets the neighbour CELL from which the ray will go next.
+            //if the current cell has an atom, just return the exit edge of the ray
+            if(currentCell.getCell_situation() == situation.ATOM){
+                break;
+            }
+            else if(currentCell.getCell_situation() == situation.EMPTY){
 
-        if(currentNeighbour.getCell_situation() == situation.ATOM){
-            return currentNeighbour;
-        }
+                exitEdge = getExitEdge(currentEdge); //gives the exit edge type
 
-        edgeDirection nextInputEdge = nextInputEdge_BasedOn_PreviousExitEdge(exitEdge);
+                int neighbourIndex = neighbourNumber(currentEdge); //gets neighbour NUMBER based on the input edge type
 
-        if(currentNeighbour.rayEntryAndExit(nextInputEdge) == null){
-            return currentNeighbour;
-        }
-        return currentNeighbour.rayEntryAndExit(nextInputEdge);
+                if(currentCell.getNeighbour_cells().get(neighbourIndex) == null){
+                    break;
+                }
+
+                currentCell = currentCell.getNeighbour_cells().get(neighbourIndex); //gets the neighbour CELL from which the ray will go next.
+                currentEdge = nextInputEdge_BasedOn_PreviousExitEdge(exitEdge);
+            }
 
 
-    } //end of rayEntryAndExit
+        } // End of while
 
+        //System.out.println("After Exit: "+currentCell.getCellNumber());
+
+        currentCell.exitEdge = this.exitEdge;
+
+        return currentCell;
+    }
+
+    //method to calculate the next input edge based on the previous exit edge
     public edgeDirection nextInputEdge_BasedOn_PreviousExitEdge(edgeDirection previousExit){
+
         switch(previousExit){
             case TR:
                 return edgeDirection.BL;
@@ -99,6 +126,7 @@ public class Cell {
         }
     }
 
+    //Method to determine the neighbor number based on the input edge
     public int neighbourNumber(edgeDirection inputEdge){
         switch(inputEdge){
             case TR:
@@ -119,6 +147,7 @@ public class Cell {
         }
     }
 
+    //method to determine the exit edge based on the input edge(entry edge)
     public edgeDirection getExitEdge(edgeDirection inputEdge) {
 
         switch(inputEdge){
