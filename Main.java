@@ -86,7 +86,7 @@ public class Main extends Application {
 
         hexGridPane = createHexGrid(); // Initialize hexagonal grid
         rootPane = new Pane(hexGridPane); // Create a root pane and add the hex grid to it
-        rootPane.getChildren().addAll(button, stopShowing, setRandom, gameTitle); // Add the button to the root pane
+        rootPane.getChildren().addAll(button, stopShowing, gameTitle); // Add the button to the root pane
         setRayButtons(rootPane); // Makes and sets the coordinates for the edge buttons
         setButtonOnAction(); // Set action for each edge button
 
