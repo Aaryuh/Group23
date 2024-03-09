@@ -1,3 +1,6 @@
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -13,6 +16,7 @@ import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +25,10 @@ import java.util.Random;
 
 
 public class Main extends Application {
+    private ArrayList<Integer> guessedAtoms; ///---------
+    private Text userGuess; /////------
+    private Timeline timeline; // -----
+    private Timeline newTimeline;
 
     private ArrayList<Main.Point> cellLocation;
     private ArrayList<Main.Point> buttonLocation;
@@ -45,6 +53,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        guessedAtoms = new ArrayList<>(); ///---------
 
         listOfRayPaths = new ArrayList<>();
 
@@ -58,7 +67,7 @@ public class Main extends Application {
         random = new Random();
         atoms = new ArrayList<>();
         gameBoard = new Board();
-        setAtoms();
+        // setAtoms();
         //System.out.println(atoms);
         Text gameTitle = new Text("Black Box+");
         gameTitle.setFont(Font.font(50));
@@ -94,6 +103,12 @@ public class Main extends Application {
 
         // Setting Cell numbers
         setCellNumbers();
+        setAtoms();
+
+        // ------
+        timeline = new Timeline(new KeyFrame(Duration.seconds(0.1), event -> updateHexGrid()));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
 
         Scene scene = new Scene(rootPane, 800, 600);
         primaryStage.setScene(scene);
@@ -118,7 +133,7 @@ public class Main extends Application {
 
         //
         for(int i = 0; i < 61; i++){
-            Text dummy = new Text(""+(i+1));
+            Text dummy = new Text(""+i);
             dummy.setFont(Font.font(15));
             dummy.setFill(Color.CYAN);
             dummy.setLayoutX(cellLocation.get(i).x);
@@ -285,16 +300,6 @@ public class Main extends Application {
         dummy.add(num);
         dummy.addAll(path);
 
-//        Line dash1 = new Line(buttonLocation.get(num).x, buttonLocation.get(num).y,cellLocation.get(path.get(0)).x,cellLocation.get(path.get(0)).y);
-//        dash1.setStroke(Color.YELLOW);
-//        rootPane.getChildren().add(dash1);
-
-//        for(int i = 0; i < path.size()-1; i++){
-//            Line dash = new Line(cellLocation.get(path.get(i)).x,cellLocation.get(path.get(i)).y,cellLocation.get(path.get(i+1)).x,cellLocation.get(path.get(i+1)).y);
-//            dash.setStroke(Color.YELLOW);
-//            rootPane.getChildren().add(dash);
-//        }
-
         Result result = new Result(exitCell.getCellNumber(), exitCell.exitEdge);
         result.setSituation(exitCell.getCell_situation());
 
@@ -302,9 +307,6 @@ public class Main extends Application {
         if(exitButtonNumber != -1 && result.situation != Cell.situation.ATOM){
             dummy.add(-100);
             dummy.add(exitButtonNumber);
-//            Line dash2 = new Line(cellLocation.get(path.get(path.size()-1)).x,cellLocation.get(path.get(path.size()-1)).y,buttonLocation.get(exitButtonNumber).x,buttonLocation.get(exitButtonNumber).y);
-//            dash2.setStroke(Color.YELLOW);
-//            rootPane.getChildren().add(dash2);
         }
         else{
             dummy.add(-1);
@@ -335,7 +337,6 @@ public class Main extends Application {
         this.showAtom = 0;
         rootPane.getChildren().removeIf(node -> node instanceof Circle);
         rootPane.getChildren().removeIf(node -> node instanceof Line);
-        updateHexGrid();
     }
 
     private Pane createHexGrid() {
@@ -383,6 +384,7 @@ public class Main extends Application {
 
     public void handleButtonClick() {
         this.showAtom = 100;
+        updateGuess();
         updateHexGrid(); // Update the hex grid when the button is clicked
     }
 
@@ -397,13 +399,64 @@ public class Main extends Application {
                     addCircleOfInfluence(); // Make COI ------------
                     addRayLines(); // Add Ray Lines
                     hexagon.setFill(Color.RED); // Set color to red for atoms
-                } else {
+                } /*else if(influenced.contains(count) && showAtom == 100) {
+                    hexagon.setFill(Color.GRAY);
+                } */
+                else if(guessedAtoms.contains(count)){
+                    hexagon.setFill(Color.YELLOW);
+                }
+                else {
                     hexagon.setFill(Color.BLACK); // Set color to black for non-atoms
                 }
+
+//                Mouse Click
+
+                hexagon.setOnMouseClicked(event -> {
+                    double clickX = event.getX();
+                    double clickY = event.getY();
+                    double centerX = cellLocation.get(count).x;
+                    double centerY = cellLocation.get(count).y;
+                    double distance = Math.sqrt(Math.pow(clickX - centerX, 2) + Math.pow(clickY - centerY, 2));
+
+                    if (distance <= 30) { // Check if click is within 30 radius
+                        guessAtom(count);
+                    }
+                });
+
             }
         }
 
+        updateGuess();
+
+
     } // End of UpdateHexGrid
+
+    public void updateGuess(){
+        rootPane.getChildren().remove(userGuess);
+
+        if(!guessedAtoms.isEmpty()){
+            userGuess = new Text("Guessed Atoms: "+guessedAtoms);
+            userGuess.setFont(Font.font(30));
+            userGuess.setFill(Color.CYAN);
+            userGuess.setLayoutX(850);
+            userGuess.setLayoutY(163);
+            userGuess.setFont(Font.font(userGuess.getFont().getFamily(), FontWeight.BOLD, userGuess.getFont().getSize()));
+            rootPane.getChildren().add(userGuess);
+        }
+    }
+
+    public void guessAtom(int num){
+        //if(guessedAtoms.size() < 6 && !guessedAtoms.contains(num)) guessedAtoms.add(num+1);
+        if(guessedAtoms.contains(num)){
+            guessedAtoms.remove(guessedAtoms.indexOf(num));
+            return;
+        }
+
+        if(guessedAtoms.size() < 6){
+            guessedAtoms.add(num);
+        }
+    }
+
 
     public void addRayLines(){
 
@@ -466,8 +519,10 @@ public class Main extends Application {
         }
 
         for(int dummy : atoms){
-            gameBoard.cells[dummy].setCell_situation(Cell.situation.ATOM);
+            gameBoard.cells[dummy].addAtom();
+            //gameBoard.cells[dummy].setCell_situation(Cell.situation.ATOM);
         }
+        updateHexGrid();
     }
 
     private void drawHexagon(Pane pane, Point center, int count) {
@@ -479,6 +534,10 @@ public class Main extends Application {
         if (atoms.contains(count) && showAtom == 100) hexagon.setFill(Color.RED);
         else hexagon.setFill(Color.BLACK);
         hexagon.setStroke(Color.WHITE);
+
+//        -------------
+
+
         pane.getChildren().add(hexagon);
     }
 
