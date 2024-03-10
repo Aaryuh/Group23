@@ -29,6 +29,7 @@ public class Main extends Application {
     private Text userGuess; /////------
     private Timeline timeline; // -----
     private Timeline newTimeline;
+    private int timeFlag;
 
     private ArrayList<Main.Point> cellLocation;
     private ArrayList<Main.Point> buttonLocation;
@@ -53,6 +54,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        timeFlag = 0;
         guessedAtoms = new ArrayList<>(); ///---------
 
         listOfRayPaths = new ArrayList<>();
@@ -106,14 +108,38 @@ public class Main extends Application {
         setAtoms();
 
         // ------
-        timeline = new Timeline(new KeyFrame(Duration.seconds(0.1), event -> updateHexGrid()));
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
+//        timeline = new Timeline(new KeyFrame(Duration.seconds(0.1), event -> updateHexGrid()));
+//        timeline.setCycleCount(Animation.INDEFINITE);
+//        timeline.play();
+        setHexClicks();
+        // updateHexGrid();
 
         Scene scene = new Scene(rootPane, 800, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
     } // End of Start
+
+    public void setHexClicks(){
+        for (Node node : hexGridPane.getChildren()) {
+            if (node instanceof Polygon) {
+                Polygon hexagon = (Polygon) node;
+                int count = hexGridPane.getChildren().indexOf(hexagon);
+                hexagon.setOnMouseClicked(event -> {
+                    double clickX = event.getX();
+                    double clickY = event.getY();
+                    double centerX = cellLocation.get(count).x;
+                    double centerY = cellLocation.get(count).y;
+                    double distance = Math.sqrt(Math.pow(clickX - centerX, 2) + Math.pow(clickY - centerY, 2));
+
+                    if (distance <= 30) { // Check if click is within 30 radius
+                        guessAtom(count);
+                        updateGuess();
+                        updateHexGrid();
+                    }
+                });
+            }
+        }
+    }
 
     public void addCircleOfInfluence(){
         for(int i = 0; i < atoms.size(); i++){
@@ -337,6 +363,7 @@ public class Main extends Application {
         this.showAtom = 0;
         rootPane.getChildren().removeIf(node -> node instanceof Circle);
         rootPane.getChildren().removeIf(node -> node instanceof Line);
+        updateHexGrid();
     }
 
     private Pane createHexGrid() {
@@ -395,7 +422,10 @@ public class Main extends Application {
             if (node instanceof Polygon) {
                 Polygon hexagon = (Polygon) node;
                 int count = hexGridPane.getChildren().indexOf(hexagon);
-                if (atoms.contains(count) && showAtom == 100) {
+                if(atoms.contains(count) && guessedAtoms.contains(count) && showAtom == 100){
+                    hexagon.setFill(Color.GREEN);
+                }
+                else if (atoms.contains(count) && showAtom == 100) {
                     addCircleOfInfluence(); // Make COI ------------
                     addRayLines(); // Add Ray Lines
                     hexagon.setFill(Color.RED); // Set color to red for atoms
@@ -409,25 +439,8 @@ public class Main extends Application {
                     hexagon.setFill(Color.BLACK); // Set color to black for non-atoms
                 }
 
-//                Mouse Click
-
-                hexagon.setOnMouseClicked(event -> {
-                    double clickX = event.getX();
-                    double clickY = event.getY();
-                    double centerX = cellLocation.get(count).x;
-                    double centerY = cellLocation.get(count).y;
-                    double distance = Math.sqrt(Math.pow(clickX - centerX, 2) + Math.pow(clickY - centerY, 2));
-
-                    if (distance <= 30) { // Check if click is within 30 radius
-                        guessAtom(count);
-                    }
-                });
-
             }
         }
-
-        updateGuess();
-
 
     } // End of UpdateHexGrid
 
