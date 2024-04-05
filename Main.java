@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-
 public class Main extends Application {
     private ArrayList<Integer> guessedAtoms; ///---------
     private Text userGuess; /////------
@@ -34,7 +33,7 @@ public class Main extends Application {
     private ArrayList<Main.Point> cellLocation;
     private ArrayList<Main.Point> buttonLocation;
     private Text raysUsed;
-    private ArrayList<ArrayList<Integer>> listOfRayPaths;
+    public ArrayList<ArrayList<Integer>> listOfRayPaths;
 
     private static final int HEX_RADIUS = 20;
     private static final Layout layout = new Layout(Layout.pointy, new Point(2 * HEX_RADIUS, 2 * HEX_RADIUS), new Point(400, 300));
@@ -496,6 +495,7 @@ public class Main extends Application {
             } // End of inner-for
 
             if(path.getLast() != -1){
+
                 //System.out.print(path.get(i)+" ;"+path.getLast());
                 Line dash2 = new Line(cellLocation.get(path.get(i)).x,cellLocation.get(path.get(i)).y,buttonLocation.get(path.getLast()).x,buttonLocation.get(path.getLast()).y);
                 dash2.setStroke(Color.YELLOW);
