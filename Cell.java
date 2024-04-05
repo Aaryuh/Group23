@@ -1,124 +1,198 @@
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Cell {
 
-    private int cellNumber;
+    private int cellNumber;  //Unique identifier for the cell
 
+<<<<<<< HEAD
     public enum situation {EMPTY, ATOM, INFLUENCE, DOUBLE_INFLUENCE, TRIPLE_INFLUENCE, REFLECTED};
+=======
+    //Enum defining possible situation for a cell
+    public enum situation {EMPTY, ATOM, INFLUENCE, DOUBLE_INFLUENCE, TRIPLE_INFLUENCE}
+>>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
 
-    public enum edgeDirection{TR, R, BR, BL, L, TL};
+    //Enum defining possible edge direction
+    public enum edgeDirection{TR, R, BR, BL, L, TL}
 
+    //current situation of the cell
     private situation cell_situation;
 
+    //List of neighboring cells
     private ArrayList<Cell> neighbour_cells;
 
+    //Constructor to initialize the cell with default values
     public Cell(){
         this.cell_situation = situation.EMPTY;
         this.cellNumber = 0;
-        neighbour_cells = new ArrayList<>();
+        this.neighbour_cells = new ArrayList<>();
     }
 
+    //Setter for the cell situation
     public void setCell_situation(situation cell_situation) {
         this.cell_situation = cell_situation;
     }
 
+    //Setter for the list of neighboring cells
     public void setNeighbour_cells(ArrayList<Cell> neighbour_cells) {
         this.neighbour_cells = neighbour_cells;
     }
 
+    //getter for the cell number
     public int getCellNumber() {
         return cellNumber;
     }
 
+    //setter for the cell number
     public void setCellNumber(int cellNumber) {
         this.cellNumber = cellNumber;
     }
 
+    //getter for the cell situation
     public situation getCell_situation() {
         return cell_situation;
     }
 
+    //getter for the list of neighboring cells
     public ArrayList<Cell> getNeighbour_cells() {
         return neighbour_cells;
     }
 
-    // --------- Ray Tracing Algorithm Starts Here ------------
+    //Proprieties related to ray tracing
+    public edgeDirection exitEdge; //exit edge of the ray that entered this cell
 
-    Cell currentNeighbour;
-    public edgeDirection exitEdge; //this is the exitEdge of the ray that entered this cell
 
-    public Cell rayEntryAndExit(edgeDirection inputEdge) { //this function will return the cell where the ray will enter and exit
+    private int deflectIndex(int curr_cell, int degree) {
 
-        if(this.getCell_situation() == situation.ATOM){ // Special case - If the first Cell has an atom
-            Cell dummy = new Cell();
-            dummy.setCellNumber(this.cellNumber);
-            dummy.exitEdge = this.exitEdge;
-            dummy.setCell_situation(this.getCell_situation());
-            return dummy;
+        int indexOut;
+
+        if( curr_cell < 0 || curr_cell > 5 || degree < -360 || degree > 360) {
+            throw new IllegalArgumentException("Index must be a value between [0, 5], Degree must be a value between [-360, 360]");
         }
 
-        exitEdge = getExitEdge(inputEdge); //gives the exit edge type
-
-        int neighbourIndex = neighbourNumber(inputEdge); //gets neighbour NUMBER based on the input edge type
-
-        if( getNeighbour_cells().get(neighbourIndex) == null){
-            return null;
+        switch(degree) {
+            case 0:
+            case 360:
+            case -360:
+                indexOut = curr_cell;
+                break;
+            case 60:
+            case -300:
+                indexOut = (curr_cell+ 1) % 6;
+                break;
+            case 120:
+            case -240:
+                indexOut = (curr_cell + 2) % 6;
+                break;
+            case 180:
+            case -180:
+                indexOut = (curr_cell + 3) % 6;
+                break;
+            case -120:
+            case 240:
+                indexOut = (curr_cell + 4) % 6;
+                break;
+            case -60:
+            case 300:
+                indexOut = (curr_cell + 5) % 6;
+                break;
+            default:
+                throw new IllegalArgumentException("Input index not valid");
         }
 
-        currentNeighbour = getNeighbour_cells().get(neighbourIndex); //gets the neighbour CELL from which the ray will go next.
-
-        if(currentNeighbour.getCell_situation() == situation.ATOM){
-            return currentNeighbour;
-        }
-
-        edgeDirection nextInputEdge = nextInputEdge_BasedOn_PreviousExitEdge(exitEdge);
-
-        if(currentNeighbour.rayEntryAndExit(nextInputEdge) == null){
-            return currentNeighbour;
-        }
-        return currentNeighbour.rayEntryAndExit(nextInputEdge);
-
-
-    } //end of rayEntryAndExit
-
-    public boolean isInfluenced(){
-        return cell_situation == situation.INFLUENCE || cell_situation == situation.DOUBLE_INFLUENCE || cell_situation == situation.TRIPLE_INFLUENCE;
+        return indexOut;
     }
 
-    public void addAtom(){
-        this.setCell_situation(situation.ATOM);
-        for(Cell dummy : this.neighbour_cells){
-            if(dummy != null) dummy.setInfluence();
+    public Cell getNextCell(Cell cIn) {
+
+        while (true) {
+
+            System.out.println("Cell: " + cIn.getCellNumber() +  "; Cell Situation: " + cIn.getCell_situation());
+
+            Cell nextCell = null;
+        int nbIndex = neighbour_cells.indexOf(cIn);
+        int deflectionsCnt = 0;
+
+        if(neighbour_cells.get(deflectIndex(nbIndex, 60)).cell_situation.equals(situation.ATOM)||neighbour_cells.get(deflectIndex(nbIndex, -60)).cell_situation.equals(situation.ATOM)|| (neighbour_cells.get(deflectIndex(nbIndex, 120)).cell_situation.equals(situation.ATOM) && neighbour_cells.get(deflectIndex(nbIndex, -120)).cell_situation.equals(situation.ATOM))) {
+            nextCell = cIn;
         }
-    } // End of method - ADD ATOM
+        else if(neighbour_cells.get(deflectIndex(nbIndex, 120)).cell_situation.equals(situation.ATOM)) {
+            deflectionsCnt++;
 
-    public void setInfluence(){
+            if(neighbour_cells.get(deflectIndex(nbIndex, 180)).cell_situation.equals(situation.ATOM)) {
+                deflectionsCnt++;
+            }
 
-//        the cell situation will only change if cell_situation is EMPTY, INFLUENCE or DOUBLE_INFLUENCE
-//        Cell situation will remain unchanged if there is an ATOM or TRIPLE_INFLUENCE
-
-        if(this.cell_situation == situation.EMPTY){
-            this.cell_situation = situation.INFLUENCE;
+            int exitIndex = deflectIndex(nbIndex, 180+60*deflectionsCnt);
+            nextCell = neighbour_cells.get(exitIndex);
         }
-        else if(this.cell_situation == situation.INFLUENCE){
-            this.cell_situation = situation.DOUBLE_INFLUENCE;
+        else if(neighbour_cells.get(deflectIndex(nbIndex, -120)).cell_situation.equals(situation.ATOM)) {
+            deflectionsCnt++;
+
+            if(neighbour_cells.get(deflectIndex(nbIndex, 180)).cell_situation.equals(situation.ATOM)) {
+                deflectionsCnt++;
+            }
+
+            int exitIndex = deflectIndex(nbIndex, 180-60*deflectionsCnt);
+            nextCell = neighbour_cells.get(exitIndex);
         }
-        else if(this.cell_situation == situation.DOUBLE_INFLUENCE){
-            this.cell_situation = situation.TRIPLE_INFLUENCE;
+        else if(neighbour_cells.get(deflectIndex(nbIndex, 180)).cell_situation.equals(situation.ATOM)) {
+            nextCell = null;
         }
-
-    } // End of method - SET_INFLUENCED
-
-    public Cell newEntryAndExit(edgeDirection inputEdge){
-
-        if(this.getCell_situation() == situation.ATOM){ // Special case - If the first Cell has an atom
-            Cell dummy = new Cell();
-            dummy.setCellNumber(this.cellNumber);
-            dummy.exitEdge = this.exitEdge;
-            dummy.setCell_situation(this.getCell_situation());
-            return dummy;
+        else {
+            nextCell = neighbour_cells.get(deflectIndex(nbIndex, 180));
         }
 
+        return nextCell;
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //Method to determine the next cell based on the input edge
+   public Cell newEntryAndExit(edgeDirection inputEdge){
+
+        // Special case - If the first Cell has an atom, return the cell itself
+        if(this.getCell_situation() == situation.ATOM){
+           return this;
+        }
+
+<<<<<<< HEAD
         if(this.getCell_situation() == situation.INFLUENCE){
             if(this.getNeighbour_cells().get(neighbourNumber(inputEdge)).getCell_situation() != situation.ATOM){
                 Cell dummy = new Cell();
@@ -129,23 +203,43 @@ public class Cell {
             }
         }
 
+=======
+        //entry edge of the ray at the beginning
+>>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
         edgeDirection currentEdge = inputEdge;
         Cell currentCell = this;
+        int index = 0;
+        int deflectionCount = 0;
 
         while(true){
+<<<<<<< HEAD
             System.out.print("Cell: "+currentCell.getCellNumber()+"; Cell Situation: "+currentCell.getCell_situation() +"; Entry Edge: "+currentEdge);
 
             if(currentCell == null) break;
 
+=======
+            System.out.println("Cell: " + currentCell.getCellNumber() +  "; Cell Situation: " + currentCell.getCell_situation() + " index: " + index);
+>>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
 
+            //if the current cell has an atom, just return the exit edge of the ray
             if(currentCell.getCell_situation() == situation.ATOM){
                 break;
             }
+<<<<<<< HEAD
             else if(currentCell.getCell_situation() == situation.TRIPLE_INFLUENCE){
                 break;
             }
             else if(currentCell.getCell_situation() == situation.INFLUENCE){
                 exitEdge = getExitEdge(currentEdge); //gives the exit edge type
+=======
+            else if (currentCell.neighbour_cells.get(deflectIndex(index,120)).cell_situation.equals(situation.ATOM)) {
+                deflectionCount ++;
+
+                int exitIndex = deflectIndex(index, 180 + 60  * deflectionCount);
+                currentCell = currentCell.getNeighbour_cells().get(exitIndex);
+            }
+            else if(currentCell.getCell_situation() == situation.EMPTY){
+>>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
 
                 int neighbourIndex = neighbourNumber(currentEdge); //gets neighbour NUMBER based on the input edge type
                 int leftNeighbourIndex = ( (neighbourIndex - 1) + 6 ) % 6;
@@ -239,13 +333,14 @@ public class Cell {
 
                 int neighbourIndex = neighbourNumber(currentEdge); //gets neighbour NUMBER based on the input edge type
 
-                if( currentCell.getNeighbour_cells().get(neighbourIndex) == null){
+                if(currentCell.getNeighbour_cells().get(neighbourIndex) == null){
                     break;
                 }
 
                 currentCell = currentCell.getNeighbour_cells().get(neighbourIndex); //gets the neighbour CELL from which the ray will go next.
-                currentEdge = nextInputEdge_BasedOn_PreviousExitEdge(exitEdge);
+                currentEdge = getExitEdge(exitEdge);
             }
+
 
         } // End of while
 
@@ -256,6 +351,7 @@ public class Cell {
         return currentCell;
     }
 
+<<<<<<< HEAD
     public ArrayList<Integer> rayPath(edgeDirection inputEdge){
 
         ArrayList<Integer> path = new ArrayList<>();
@@ -453,6 +549,9 @@ public class Cell {
         }
     }
 
+=======
+    //Method to determine the neighbor number based on the input edge
+>>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
     public int neighbourNumber(edgeDirection inputEdge){
         switch(inputEdge){
             case TR:
@@ -473,6 +572,27 @@ public class Cell {
         }
     }
 
+
+    public edgeDirection NumberToEdge (int inputEdge){
+        switch(inputEdge){
+            case 3:
+                return edgeDirection.TR;
+            case 4:
+                return edgeDirection.R;
+            case 5:
+                return edgeDirection.BR;
+            case 0:
+                return edgeDirection.BL;
+            case 1:
+                return edgeDirection.L;
+            case 2:
+                return edgeDirection.TL;
+            default:
+                throw new IllegalArgumentException("invalid edge");
+        }
+    }
+
+    //method to determine the exit edge based on the input edge(entry edge)
     public edgeDirection getExitEdge(edgeDirection inputEdge) {
 
         switch(inputEdge){
@@ -493,8 +613,9 @@ public class Cell {
 
         }
 
-    } //end of exitEdge
+    }
 
+<<<<<<< HEAD
     // --------- Ray Tracing Algorithm Ends Here ------------
 
 }
@@ -617,3 +738,6 @@ public class Cell {
 //    }
 //
 //}
+=======
+}
+>>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
