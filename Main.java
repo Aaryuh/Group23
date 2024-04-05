@@ -91,7 +91,7 @@ public class Main extends Application {
         rayCount++; // Increase Count
         buttons.get(num).setDisable(true); // Disable Button
 
-        Cell exitCell = gameBoard.cells[buttonNumberToCellNumber(num)].rayEntryAndExit(buttonNumberToEdge(num));
+        Cell exitCell = gameBoard.cells[buttonNumberToCellNumber(num)].newEntryAndExit(buttonNumberToEdge(num));
         Result result = new Result(exitCell.getCellNumber(), exitCell.exitEdge);
         result.setSituation(exitCell.getCell_situation());
         int exitButtonNumber = findExitButtonNumber(result);

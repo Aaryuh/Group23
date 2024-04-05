@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Board {
 
@@ -20,17 +21,8 @@ public class Board {
         }
     }
 
-    public void addAtom(int position) {
 
-        cells[position].setCell_situation(Cell.situation.ATOM);
-        cells[position].setCell_situation(Cell.situation.INFLUENCE);
-        cells[position].setCell_situation(Cell.situation.DOUBLE_INFLUENCE);
-        cells[position].setCell_situation(Cell.situation.TRIPLE_INFLUENCE);
-
-    }
-
-
-    private void makeBoard(){
+    private void makeBoard() {
         //arrayList containing the cells with their specific neighbour
         ArrayList<Cell> dummy = new ArrayList<>();
 
