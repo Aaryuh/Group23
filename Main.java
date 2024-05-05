@@ -5,51 +5,93 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
+import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+
+
+/**
+ * The Main class represents the implementation of the "Black Box+" game by Eric Solomon.
+ * This class extends the Application class of JavaFX, providing the graphical user interface.
+ */
 public class Main extends Application {
-<<<<<<< HEAD
-    private ArrayList<Integer> guessedAtoms; ///---------
-    private Text userGuess; /////------
-    private Timeline timeline; // -----
-    private Timeline newTimeline;
+    /** List to store guessed atom positions. */
+    public ArrayList<Integer> guessedAtoms; ///---------
 
-    private ArrayList<Main.Point> cellLocation;
-    private ArrayList<Main.Point> buttonLocation;
-    private Text raysUsed;
+    /** Text object to display user guesses. */
+    public Text userGuess; /////------
+
+    /** List to store cell locations. */
+    public ArrayList<Main.Point> cellLocation;
+
+    /** List to store button locations. */
+    public ArrayList<Main.Point> buttonLocation;
+
+    /** Text object to display the number of rays used. */
+    public Text raysUsed;
+
+    /** Text object to display the current score. */
+    public Text scoreText;
+
+    /** List of lists to store ray paths. */
     public ArrayList<ArrayList<Integer>> listOfRayPaths;
-=======
->>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
 
-    private static final int HEX_RADIUS = 20;
+    /** Radius of the hexagons on the grid. */
+    public static final int HEX_RADIUS = 20;
+
+    /** Layout object for hexagons. */
     private static final Layout layout = new Layout(Layout.pointy, new Point(2 * HEX_RADIUS, 2 * HEX_RADIUS), new Point(400, 300));
 
+    /** Random object for generating random numbers. */
+    private Random random;
+
+    /** List to store atom positions. */
+    public ArrayList<Integer> atoms;
+
+    /** Flag to indicate whether atoms are shown or hidden. */
+    public int showAtom; // flag -- if enabled(show atoms) or disabled (hide atoms)
+
+    /** Pane to store the hexagonal grid. */
+    public Pane hexGridPane; // Store the hexagonal grid pane
+
+    /** Game board object. */
+    public Board gameBoard;
+
+    /** List of buttons representing edges. */
+    public ArrayList<Button> buttons; // List of buttons for the edges 0 -> 53
+
+    /** Count of the number of rays sent. */
+    public static int rayCount; // Count of the number of rays sent
+
+    /** Root pane of the application. */
+    private Pane rootPane;
+
+    /**
+     * The main method of the program.
+     * @param args Command-line arguments.
+     */
     public static void main(String[] args) {
         launch(args);
     }
 
-    private Random random;
-    private ArrayList<Integer> atoms;
-    private int showAtom;
-    private Pane hexGridPane; // Store the hexagonal grid pane
-    private Board gameBoard;
-    private ArrayList<Button> buttons;
-    private static int rayCount;
-
+    /**
+     * Initializes and starts the JavaFX application.
+     * @param primaryStage The primary stage for the application.
+     */
     @Override
     public void start(Stage primaryStage) {
-<<<<<<< HEAD
-        guessedAtoms = new ArrayList<>(); ///---------
+        guessedAtoms = new ArrayList<>();
 
         listOfRayPaths = new ArrayList<>();
 
@@ -58,15 +100,12 @@ public class Main extends Application {
         buttonLocation = new ArrayList<>();
         setButtonLocations(buttonLocation);
 
-=======
->>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
         rayCount = 0;
         buttons = new ArrayList<>();
         random = new Random();
         atoms = new ArrayList<>();
         gameBoard = new Board();
-        setAtoms();
-        //System.out.println(atoms);
+
         Text gameTitle = new Text("Black Box+");
         gameTitle.setFont(Font.font(50));
         gameTitle.setFill(Color.RED);
@@ -76,47 +115,59 @@ public class Main extends Application {
         gameTitle.setUnderline(true);
 
         primaryStage.setTitle("Black Box+ By Group 23");
-        Button button = new Button("Show Atoms");
+        Button button = new Button("End Game");
         button.setMinSize(40, 80);
         button.setLayoutY(100);
         button.setOnAction(event -> handleButtonClick());
 
-        Button stopShowing = new Button("Stop Showing");
-        stopShowing.setMinSize(40, 80);
-        stopShowing.setOnAction(event -> handleShowClick());
-        stopShowing.setLayoutX(100);
-        stopShowing.setLayoutY(100);
-
-        Button setRandom = new Button("Set Atoms");
-        setRandom.setMinSize(40, 80);
-        setRandom.setOnAction(event -> handleSetClick());
-        setRandom.setLayoutX(210);
-        setRandom.setLayoutY(100);
 
         hexGridPane = createHexGrid(); // Initialize hexagonal grid
-        Pane rootPane = new Pane(hexGridPane); // Create a root pane and add the hex grid to it
-        rootPane.getChildren().addAll(button, stopShowing, setRandom, gameTitle); // Add the button to the root pane
+        rootPane = new Pane(hexGridPane); // Create a root pane and add the hex grid to it
+        rootPane.getChildren().addAll(button, gameTitle); // Add the button to the root pane
         setRayButtons(rootPane); // Makes and sets the coordinates for the edge buttons
         setButtonOnAction(); // Set action for each edge button
 
-<<<<<<< HEAD
         // Setting Cell numbers
         setCellNumbers();
         setAtoms();
 
-        // ------
-        timeline = new Timeline(new KeyFrame(Duration.seconds(0.1), event -> updateHexGrid()));
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
+        setHexClicks();
 
-=======
->>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
+        rootPane.setStyle("-fx-background-color: silver");
+
         Scene scene = new Scene(rootPane, 800, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
     } // End of Start
 
-<<<<<<< HEAD
+    /**
+     * Sets up the mouse click events for hexagons on the grid.
+     */
+    public void setHexClicks(){
+        for (Node node : hexGridPane.getChildren()) {
+            if (node instanceof Polygon) {
+                Polygon hexagon = (Polygon) node;
+                int count = hexGridPane.getChildren().indexOf(hexagon);
+                hexagon.setOnMouseClicked(event -> {
+                    double clickX = event.getX();
+                    double clickY = event.getY();
+                    double centerX = cellLocation.get(count).x;
+                    double centerY = cellLocation.get(count).y;
+                    double distance = Math.sqrt(Math.pow(clickX - centerX, 2) + Math.pow(clickY - centerY, 2));
+
+                    if (distance <= 30) { // Check if click is within 30 radius
+                        guessAtom(count);
+                        updateGuess();
+                        updateHexGrid();
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Adds circles of influence around atoms.
+     */
     public void addCircleOfInfluence(){
         for(int i = 0; i < atoms.size(); i++){
             Circle dummy = new Circle();
@@ -131,6 +182,9 @@ public class Main extends Application {
         }
     } // End Of CIRCLE Of Influence
 
+    /**
+     * Sets numbers on each cell of the grid.
+     */
     public void setCellNumbers(){
 
         //
@@ -145,6 +199,10 @@ public class Main extends Application {
 
     }
 
+    /**
+     * Sets locations for buttons representing edges.
+     * @param list ArrayList to store button locations.
+     */
     private void setButtonLocations(ArrayList<Main.Point> list) {
 
         list.add(new Point(354.4, 197.6)); // 0
@@ -204,6 +262,10 @@ public class Main extends Application {
 
     } // End of button Locations
 
+    /**
+     * Sets locations for cells on the grid.
+     * @param list ArrayList to store cell locations.
+     */
     private void setCelllocations(ArrayList<Main.Point> list) {
 
         list.add(new Point(372,225.6)); // 0
@@ -271,8 +333,9 @@ public class Main extends Application {
 
     } // End of setting cell locations
 
-=======
->>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
+    /**
+     * Assigns action to each button.
+     */
     public void setButtonOnAction() { // Assigns the action for each button
         for(int i = 0; i < buttons.size(); i++){
             int finalI = i;
@@ -280,23 +343,66 @@ public class Main extends Application {
         }
     }
 
+    /**
+     * Performs actions when an edge button is clicked.
+     * @param num The number representing the clicked edge button.
+     */
     public void handleEdgeButtonClick(int num){ // Performs the assigned action when an edge button is clicked
         rayCount++; // Increase Count
+
+        rootPane.getChildren().remove(raysUsed);
+
+        raysUsed = new Text("Rays Used: "+rayCount);
+        raysUsed.setFont(Font.font(30));
+        raysUsed.setFill(Color.BLACK);
+        raysUsed.setLayoutX(0);
+        raysUsed.setLayoutY(75);
+        raysUsed.setFont(Font.font(raysUsed.getFont().getFamily(), FontWeight.BOLD, raysUsed.getFont().getSize()));
+        rootPane.getChildren().add(raysUsed);
+
         buttons.get(num).setDisable(true); // Disable Button
 
         Cell exitCell = gameBoard.cells[buttonNumberToCellNumber(num)].newEntryAndExit(buttonNumberToEdge(num));
+        ArrayList<Integer> path = gameBoard.cells[buttonNumberToCellNumber(num)].rayPath(buttonNumberToEdge(num));
+        // listOfRayPaths.add(path);
+//        System.out.println(path); // path
+
+        ArrayList<Integer> dummy = new ArrayList<>();
+        dummy.add(num);
+        dummy.addAll(path);
+
         Result result = new Result(exitCell.getCellNumber(), exitCell.exitEdge);
         result.setSituation(exitCell.getCell_situation());
+
         int exitButtonNumber = findExitButtonNumber(result);
+        if(exitButtonNumber != -1 && result.situation != Cell.situation.ATOM && result.situation != Cell.situation.REFLECTED){
+            rayCount++;
+            dummy.add(-100);
+            dummy.add(exitButtonNumber);
+        }
+        else{
+            dummy.add(-1);
+        }
+        listOfRayPaths.add(dummy);
 //        System.out.println(result.situation);
         if(result.situation == Cell.situation.ATOM){
             buttons.get(num).setStyle("-fx-background-color: red");
         }
+        else if(result.situation == Cell.situation.TRIPLE_INFLUENCE){
+            buttons.get(num).setStyle("-fx-background-color: yellow");
+        }
+        else if(result.situation == Cell.situation.REFLECTED){
+            buttons.get(num).setStyle("-fx-background-color: yellow");
+        }
         else{
             buttons.get(num).setText(""+rayCount);
-            buttons.get(exitButtonNumber).setText(""+rayCount);
-            buttons.get(exitButtonNumber).setDisable(true);
+            if(exitButtonNumber != -1){
+                buttons.get(exitButtonNumber).setText(""+rayCount);
+                buttons.get(exitButtonNumber).setDisable(true);
+            }
         }
+
+        updateHexGrid();
 
     }
 
@@ -305,16 +411,10 @@ public class Main extends Application {
         updateHexGrid();
     }
 
-    public void handleShowClick(){
-        this.showAtom = 0;
-<<<<<<< HEAD
-        rootPane.getChildren().removeIf(node -> node instanceof Circle);
-        rootPane.getChildren().removeIf(node -> node instanceof Line);
-=======
-        updateHexGrid();
->>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
-    }
-
+    /**
+     * Creates the hexagonal grid.
+     * @return The pane containing the hexagonal grid.
+     */
     private Pane createHexGrid() {
         Pane pane = new Pane();
 
@@ -358,64 +458,75 @@ public class Main extends Application {
         return pane;
     }
 
+    /**
+     * Handles end game button click.
+     */
     public void handleButtonClick() {
+        // End game button click
         this.showAtom = 100;
+        int score = rayCount;
+        for(int hexagonNumber : atoms){
+            if(!guessedAtoms.contains(hexagonNumber)){
+                score += 5;
+            }
+        }
+
+        scoreText = new Text("Final Score: "+score);
+        scoreText.setFont(Font.font(30));
+        scoreText.setFill(Color.BLACK);
+        scoreText.setLayoutX(0);
+        scoreText.setLayoutY(300);
+        scoreText.setFont(Font.font(scoreText.getFont().getFamily(), FontWeight.BOLD, scoreText.getFont().getSize()));
+        rootPane.getChildren().add(scoreText);
+
+        updateGuess();
         updateHexGrid(); // Update the hex grid when the button is clicked
     }
 
+    /**
+     * Updates the colors of hexagons on the grid.
+     */
     private void updateHexGrid() {
 
         // Iterate over existing hexagons and update their colors
         for (Node node : hexGridPane.getChildren()) {
             if (node instanceof Polygon) {
                 Polygon hexagon = (Polygon) node;
-<<<<<<< HEAD
                 int count = hexGridPane.getChildren().indexOf(hexagon);
-                if (atoms.contains(count) && showAtom == 100) {
+                if(atoms.contains(count) && guessedAtoms.contains(count) && showAtom == 100){
+                    hexagon.setFill(Color.GREEN);
+                }
+                else if (atoms.contains(count) && showAtom == 100) {
                     addCircleOfInfluence(); // Make COI ------------
                     addRayLines(); // Add Ray Lines
-=======
-                int count = hexGridPane.getChildren().indexOf(hexagon); // Removed the -1 here -------
-                if (atoms.contains(count) && showAtom == 100) {
->>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
                     hexagon.setFill(Color.RED); // Set color to red for atoms
-                } else {
+                } /*else if(influenced.contains(count) && showAtom == 100) {
+                    hexagon.setFill(Color.GRAY);
+                } */
+                else if(guessedAtoms.contains(count)){
+                    hexagon.setFill(Color.YELLOW);
+                }
+                else {
                     hexagon.setFill(Color.BLACK); // Set color to black for non-atoms
                 }
-<<<<<<< HEAD
 
-//                Mouse Click
-
-                hexagon.setOnMouseClicked(event -> {
-                    double clickX = event.getX();
-                    double clickY = event.getY();
-                    double centerX = cellLocation.get(count).x;
-                    double centerY = cellLocation.get(count).y;
-                    double distance = Math.sqrt(Math.pow(clickX - centerX, 2) + Math.pow(clickY - centerY, 2));
-
-                    if (distance <= 30) { // Check if click is within 30 radius
-                        guessAtom(count);
-                    }
-                });
-
-=======
->>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
             }
         }
 
-        updateGuess();
-
-
     } // End of UpdateHexGrid
 
-<<<<<<< HEAD
+    /**
+     * Updates the display of guessed atoms.
+     * If guessedAtoms is not empty, it creates and adds a Text object to display the guessed atoms.
+     * The text is displayed at a specified location on the root pane.
+     */
     public void updateGuess(){
         rootPane.getChildren().remove(userGuess);
 
         if(!guessedAtoms.isEmpty()){
             userGuess = new Text("Guessed Atoms: "+guessedAtoms);
             userGuess.setFont(Font.font(30));
-            userGuess.setFill(Color.CYAN);
+            userGuess.setFill(Color.BLACK);
             userGuess.setLayoutX(850);
             userGuess.setLayoutY(163);
             userGuess.setFont(Font.font(userGuess.getFont().getFamily(), FontWeight.BOLD, userGuess.getFont().getSize()));
@@ -423,6 +534,12 @@ public class Main extends Application {
         }
     }
 
+    /**
+     * Adds or removes a guessed atom based on user input.
+     * If the guessed atom already exists in the list, it removes it.
+     * If the list size is less than 6, it adds the guessed atom to the list.
+     * @param num The index of the guessed atom.
+     */
     public void guessAtom(int num){
         //if(guessedAtoms.size() < 6 && !guessedAtoms.contains(num)) guessedAtoms.add(num+1);
         if(guessedAtoms.contains(num)){
@@ -435,7 +552,10 @@ public class Main extends Application {
         }
     }
 
-
+    /**
+     * Adds ray lines to the grid based on the paths stored in listOfRayPaths.
+     * It draws lines representing the paths of rays from button to cell and vice versa.
+     */
     public void addRayLines(){
 
         //System.out.println();
@@ -461,7 +581,6 @@ public class Main extends Application {
             } // End of inner-for
 
             if(path.getLast() != -1){
-
                 //System.out.print(path.get(i)+" ;"+path.getLast());
                 Line dash2 = new Line(cellLocation.get(path.get(i)).x,cellLocation.get(path.get(i)).y,buttonLocation.get(path.getLast()).x,buttonLocation.get(path.getLast()).y);
                 dash2.setStroke(Color.YELLOW);
@@ -471,9 +590,11 @@ public class Main extends Application {
 
     } // End of addRayLines
 
-=======
->>>>>>> e2cbb035d3ab3c96b281bfc4c6c4b824efc0e719
-
+    /**
+     * Randomly sets atoms on the game board.
+     * It first deallocates any existing atoms, then selects six unique cells to place atoms.
+     * The atoms are added to the game board and the UI is updated accordingly.
+     */
     private void setAtoms() {
         // Check if atoms have been previously allocated, and if so, deallocate them
         if(!atoms.isEmpty()){
@@ -499,11 +620,36 @@ public class Main extends Application {
             atoms.add(uniqueNumbers.get(i));
         }
 
+//        // Figure 3
+//        atoms.add(12);
+//        atoms.add(21);
+//        atoms.add(22);
+//        atoms.add(28);
+//        atoms.add(29);
+//        atoms.add(25);
+
+        // Figure 4
+//        atoms.add(13);
+//        atoms.add(15);
+//        atoms.add(31);
+//        atoms.add(32);
+//        atoms.add(51);
+//        atoms.add(59);
+
         for(int dummy : atoms){
-            gameBoard.cells[dummy].setCell_situation(Cell.situation.ATOM);
+            gameBoard.cells[dummy].addAtom();
+            //gameBoard.cells[dummy].setCell_situation(Cell.situation.ATOM);
         }
+        updateHexGrid();
     }
 
+    /**
+     * Draws a hexagon on the specified pane.
+     * The color of the hexagon is determined based on whether it contains an atom or not.
+     * @param pane The pane where the hexagon will be drawn.
+     * @param center The center point of the hexagon.
+     * @param count The count of the hexagon.
+     */
     private void drawHexagon(Pane pane, Point center, int count) {
         ArrayList<Point> corners = layout.polygonCorners(new Hex(0, 0, 0));
         Polygon hexagon = new Polygon();
@@ -513,9 +659,19 @@ public class Main extends Application {
         if (atoms.contains(count) && showAtom == 100) hexagon.setFill(Color.RED);
         else hexagon.setFill(Color.BLACK);
         hexagon.setStroke(Color.WHITE);
+
+//        -------------
+
+
         pane.getChildren().add(hexagon);
     }
 
+    /**
+     * Converts button number to cell number.
+     * Maps button numbers to corresponding cell numbers.
+     * @param num The button number.
+     * @return The corresponding cell number.
+     */
     public int buttonNumberToCellNumber(int num){ // Takes in the number of an edge button and returns the corresponding cell number (refer to board drawing to verify)
         switch(num){
             case 0:
@@ -600,8 +756,14 @@ public class Main extends Application {
         }
     }
 
+    /**
+     * Finds the exit button number based on the result.
+     * Determines the button number where a ray will exit based on the result of ray interaction.
+     * @param dummy The result of ray interaction.
+     * @return The number of the exit button.
+     */
     public int findExitButtonNumber(Result dummy){ // Finds the number of the button where a ray will exit
-        System.out.println("Exit Button: "+ dummy.CellNumber+" ; "+dummy.lastExitEdge+"; Exit button sitution: "+dummy.situation);
+//        System.out.println("Exit Button: "+ dummy.CellNumber+" ; "+dummy.lastExitEdge+"; Exit button sitution: "+dummy.situation);
         if(dummy.CellNumber == 0){
             if(dummy.lastExitEdge == Cell.edgeDirection.TL) return 0;
             else if(dummy.lastExitEdge == Cell.edgeDirection.TR) return 1;
@@ -707,6 +869,12 @@ public class Main extends Application {
         return -1;
     }
 
+    /**
+     * Converts button number to edge direction.
+     * Maps button numbers to corresponding edge directions for ray emission.
+     * @param num The button number.
+     * @return The corresponding edge direction.
+     */
     public Cell.edgeDirection buttonNumberToEdge(int num){ // Takes in a button number and gives the corresponding edge direction to send the ray from
         switch(num){
             case 0:
@@ -822,21 +990,39 @@ public class Main extends Application {
         }
     }
 
+    /**
+     * Represents a point with coordinates (x, y).
+     */
     public static class Point {
         public final double x;
         public final double y;
 
+        /**
+         * Constructs a Point object with the given coordinates.
+         * @param x The x-coordinate.
+         * @param y The y-coordinate.
+         */
         public Point(double x, double y) {
             this.x = x;
             this.y = y;
         }
     }
 
+    /**
+     * Represents a hexagon in axial coordinates (q, r, s).
+     */
     public static class Hex {
         public final int q;
         public final int r;
         public final int s;
 
+        /**
+         * Constructs a Hex object with the given axial coordinates.
+         * @param q The q-coordinate.
+         * @param r The r-coordinate.
+         * @param s The s-coordinate.
+         * @throws IllegalArgumentException if q + r + s is not equal to 0.
+         */
         public Hex(int q, int r, int s) {
             this.q = q;
             this.r = r;
@@ -845,6 +1031,10 @@ public class Main extends Application {
         }
     }
 
+    /**
+     * Represents the layout of the hexagonal grid.
+     * Defines the orientation, size, and origin of the grid.
+     */
     public static class Layout {
         public final Orientation orientation;
         public final Point size;
@@ -859,18 +1049,34 @@ public class Main extends Application {
                 2.0 / 3.0, 0.0, -1.0 / 3.0, Math.sqrt(3.0) / 3.0, 0.0);
 
 
+        /**
+         * Constructs a Layout object with the given orientation, size, and origin.
+         * @param orientation The orientation of the grid.
+         * @param size The size of the hexagons.
+         * @param origin The origin point of the grid.
+         */
         public Layout(Orientation orientation, Point size, Point origin) {
             this.orientation = orientation;
             this.size = size;
             this.origin = origin;
         }
 
+        /**
+         * Converts hexagonal coordinates to pixel coordinates.
+         * @param h The hexagonal coordinates.
+         * @return The pixel coordinates.
+         */
         public Point hexToPixel(Hex h) {
             double x = (orientation.f0 * h.q + orientation.f1 * h.r) * size.x;
             double y = (orientation.f2 * h.q + orientation.f3 * h.r) * size.y;
             return new Point(x + origin.x, y + origin.y);
         }
 
+        /**
+         * Calculates the corners of a hexagon.
+         * @param h The hexagonal coordinates.
+         * @return A list of corner points.
+         */
         public ArrayList<Point> polygonCorners(Hex h) {
             ArrayList<Point> corners = new ArrayList<>();
             Point center = hexToPixel(h);
@@ -881,12 +1087,21 @@ public class Main extends Application {
             return corners;
         }
 
+        /**
+         * Calculates the offset of a hexagon's corner.
+         * @param corner The corner index.
+         * @return The offset of the corner.
+         */
         public Point hexCornerOffset(int corner) {
             double angle = 2.0 * Math.PI * (orientation.start_angle - corner) / 6.0;
             return new Point(size.x * Math.cos(angle), size.y * Math.sin(angle));
         }
     }
 
+    /**
+     * Represents the orientation of the hexagonal grid.
+     * Defines the transformation parameters for hexagonal coordinates.
+     */
     public static class Orientation {
         public final double f0;
         public final double f1;
@@ -898,6 +1113,12 @@ public class Main extends Application {
         public final double b3;
         public final double start_angle;
 
+        /**
+         * Constructs an Orientation object with the given transformation parameters.
+         * @param f0 - f3 The forward transformation parameters.
+         * @param b0 - b3 The backward transformation parameters.
+         * @param start_angle The starting angle.
+         */
         public Orientation(double f0, double f1, double f2, double f3, double b0, double b1, double b2, double b3, double start_angle) {
             this.f0 = f0;
             this.f1 = f1;
@@ -911,926 +1132,931 @@ public class Main extends Application {
         }
     }
 
+    /**
+     * Sets the ray buttons on the root pane.
+     * Creates and adds button objects to represent ray emission directions.
+     * @param rootPane The root pane where the buttons will be added.
+     */
     public void setRayButtons(Pane rootPane){
         //        0
-                Button button0 = new Button();
-                button0.setMinSize(15, 20);
-                button0.setLayoutX(344);
-                button0.setLayoutY(179);
-        
-                // Create a Rotate transformation
-                Rotate rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button0.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button0.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button0.getTransforms().add(rotation);
-                buttons.add(button0);
-                rootPane.getChildren().add(button0);
-        
+        Button button0 = new Button();
+        button0.setMinSize(15, 20);
+        button0.setLayoutX(344);
+        button0.setLayoutY(179);
+
+        // Create a Rotate transformation
+        Rotate rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button0.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button0.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button0.getTransforms().add(rotation);
+        buttons.add(button0);
+        rootPane.getChildren().add(button0);
+
         //        1
-                Button button1 = new Button();
-                button1.setMinSize(15, 20);
-                button1.setLayoutX(385);
-                button1.setLayoutY(178);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button1.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button1.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button1.getTransforms().add(rotation);
-                buttons.add(button1);
-                rootPane.getChildren().add(button1);
-        
+        Button button1 = new Button();
+        button1.setMinSize(15, 20);
+        button1.setLayoutX(385);
+        button1.setLayoutY(178);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button1.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button1.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button1.getTransforms().add(rotation);
+        buttons.add(button1);
+        rootPane.getChildren().add(button1);
+
         //        2
-                Button button2 = new Button();
-                button2.setMinSize(15, 20);
-                button2.setLayoutX(415);
-                button2.setLayoutY(178);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button2.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button2.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button2.getTransforms().add(rotation);
-                buttons.add(button2);
-                rootPane.getChildren().add(button2);
-        
+        Button button2 = new Button();
+        button2.setMinSize(15, 20);
+        button2.setLayoutX(415);
+        button2.setLayoutY(178);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button2.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button2.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button2.getTransforms().add(rotation);
+        buttons.add(button2);
+        rootPane.getChildren().add(button2);
+
         //        3
-                Button button3 = new Button();
-                button3.setMinSize(15, 20);
-                button3.setLayoutX(456);
-                button3.setLayoutY(178);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button3.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button3.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button3.getTransforms().add(rotation);
-                buttons.add(button3);
-                rootPane.getChildren().add(button3);
-        
+        Button button3 = new Button();
+        button3.setMinSize(15, 20);
+        button3.setLayoutX(456);
+        button3.setLayoutY(178);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button3.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button3.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button3.getTransforms().add(rotation);
+        buttons.add(button3);
+        rootPane.getChildren().add(button3);
+
         //        4
-                Button button4 = new Button();
-                button4.setMinSize(15, 20);
-                button4.setLayoutX(482);
-                button4.setLayoutY(178);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button4.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button4.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button4.getTransforms().add(rotation);
-                buttons.add(button4);
-                rootPane.getChildren().add(button4);
-        
+        Button button4 = new Button();
+        button4.setMinSize(15, 20);
+        button4.setLayoutX(482);
+        button4.setLayoutY(178);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button4.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button4.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button4.getTransforms().add(rotation);
+        buttons.add(button4);
+        rootPane.getChildren().add(button4);
+
         //        5
-                Button button5 = new Button();
-                button5.setMinSize(15, 20);
-                button5.setLayoutX(524);
-                button5.setLayoutY(178);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button5.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button5.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button5.getTransforms().add(rotation);
-                buttons.add(button5);
-                rootPane.getChildren().add(button5);
-        
+        Button button5 = new Button();
+        button5.setMinSize(15, 20);
+        button5.setLayoutX(524);
+        button5.setLayoutY(178);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button5.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button5.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button5.getTransforms().add(rotation);
+        buttons.add(button5);
+        rootPane.getChildren().add(button5);
+
         //        6
-                Button button6 = new Button();
-                button6.setMinSize(15, 20);
-                button6.setLayoutX(550);
-                button6.setLayoutY(178);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button6.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button6.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button6.getTransforms().add(rotation);
-                buttons.add(button6);
-                rootPane.getChildren().add(button6);
-        
+        Button button6 = new Button();
+        button6.setMinSize(15, 20);
+        button6.setLayoutX(550);
+        button6.setLayoutY(178);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button6.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button6.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button6.getTransforms().add(rotation);
+        buttons.add(button6);
+        rootPane.getChildren().add(button6);
+
         //                7
-                Button button7 = new Button();
-                button7.setMinSize(15, 20);
-                button7.setLayoutX(593);
-                button7.setLayoutY(176);
-        
+        Button button7 = new Button();
+        button7.setMinSize(15, 20);
+        button7.setLayoutX(593);
+        button7.setLayoutY(176);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button7.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button7.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button7.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button7.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button7.getTransforms().add(rotation);
-                buttons.add(button7);
-                rootPane.getChildren().add(button7);
-        
+        button7.getTransforms().add(rotation);
+        buttons.add(button7);
+        rootPane.getChildren().add(button7);
+
         //        8
-                Button button8 = new Button();
-                button8.setMinSize(15, 20);
-                button8.setLayoutX(618);
-                button8.setLayoutY(178);
-        
+        Button button8 = new Button();
+        button8.setMinSize(15, 20);
+        button8.setLayoutX(618);
+        button8.setLayoutY(178);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button8.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button8.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button8.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button8.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button8.getTransforms().add(rotation);
-                buttons.add(button8);
-                rootPane.getChildren().add(button8);
-        
+        button8.getTransforms().add(rotation);
+        buttons.add(button8);
+        rootPane.getChildren().add(button8);
+
         //        9 -------------
-                Button button9 = new Button();
-                button9.setMinSize(15, 20);
-                button9.setLayoutX(663);
-                button9.setLayoutY(176);
-        
+        Button button9 = new Button();
+        button9.setMinSize(15, 20);
+        button9.setLayoutX(663);
+        button9.setLayoutY(176);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button9.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button9.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button9.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button9.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button9.getTransforms().add(rotation);
-                buttons.add(button9);
-                rootPane.getChildren().add(button9);
-        
+        button9.getTransforms().add(rotation);
+        buttons.add(button9);
+        rootPane.getChildren().add(button9);
+
         //        10
-                Button button10 = new Button();
-                button10.setMinSize(15, 20);
-                button10.setLayoutX(685);
-                button10.setLayoutY(213);
-        
+        Button button10 = new Button();
+        button10.setMinSize(15, 20);
+        button10.setLayoutX(685);
+        button10.setLayoutY(213);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button10.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button10.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button10.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button10.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button10.getTransforms().add(rotation);
-                buttons.add(button10);
-                rootPane.getChildren().add(button10);
-        
+        button10.getTransforms().add(rotation);
+        buttons.add(button10);
+        rootPane.getChildren().add(button10);
+
         //        11
-                Button button11 = new Button();
-                button11.setMinSize(15, 20);
-                button11.setLayoutX(700);
-                button11.setLayoutY(240);
-        
+        Button button11 = new Button();
+        button11.setMinSize(15, 20);
+        button11.setLayoutX(700);
+        button11.setLayoutY(240);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button11.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button11.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button11.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button11.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button11.getTransforms().add(rotation);
-                buttons.add(button11);
-                rootPane.getChildren().add(button11);
-        
+        button11.getTransforms().add(rotation);
+        buttons.add(button11);
+        rootPane.getChildren().add(button11);
+
         //        12
-                Button button12 = new Button();
-                button12.setMinSize(15, 20);
-                button12.setLayoutX(719);
-                button12.setLayoutY(274);
-        
+        Button button12 = new Button();
+        button12.setMinSize(15, 20);
+        button12.setLayoutX(719);
+        button12.setLayoutY(274);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button12.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button12.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button12.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button12.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button12.getTransforms().add(rotation);
-                buttons.add(button12);
-                rootPane.getChildren().add(button12);
-        
+        button12.getTransforms().add(rotation);
+        buttons.add(button12);
+        rootPane.getChildren().add(button12);
+
         //        13
-                Button button13 = new Button();
-                button13.setMinSize(15, 20);
-                button13.setLayoutX(736);
-                button13.setLayoutY(298);
-        
+        Button button13 = new Button();
+        button13.setMinSize(15, 20);
+        button13.setLayoutX(736);
+        button13.setLayoutY(298);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button13.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button13.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button13.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button13.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button13.getTransforms().add(rotation);
-                buttons.add(button13);
-                rootPane.getChildren().add(button13);
-        
+        button13.getTransforms().add(rotation);
+        buttons.add(button13);
+        rootPane.getChildren().add(button13);
+
         //        14
-                Button button14 = new Button();
-                button14.setMinSize(15, 20);
-                button14.setLayoutX(754);
-                button14.setLayoutY(332);
-        
+        Button button14 = new Button();
+        button14.setMinSize(15, 20);
+        button14.setLayoutX(754);
+        button14.setLayoutY(332);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button14.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button14.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button14.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button14.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button14.getTransforms().add(rotation);
-                buttons.add(button14);
-                rootPane.getChildren().add(button14);
-        
+        button14.getTransforms().add(rotation);
+        buttons.add(button14);
+        rootPane.getChildren().add(button14);
+
         //        15
-                Button button15 = new Button();
-                button15.setMinSize(15, 20);
-                button15.setLayoutX(769);
-                button15.setLayoutY(358);
-        
+        Button button15 = new Button();
+        button15.setMinSize(15, 20);
+        button15.setLayoutX(769);
+        button15.setLayoutY(358);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button15.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button15.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button15.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button15.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button15.getTransforms().add(rotation);
-                buttons.add(button15);
-                rootPane.getChildren().add(button15);
-        
+        button15.getTransforms().add(rotation);
+        buttons.add(button15);
+        rootPane.getChildren().add(button15);
+
         //        16
-                Button button16 = new Button();
-                button16.setMinSize(15, 20);
-                button16.setLayoutX(788);
-                button16.setLayoutY(391);
-        
+        Button button16 = new Button();
+        button16.setMinSize(15, 20);
+        button16.setLayoutX(788);
+        button16.setLayoutY(391);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button16.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button16.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button16.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button16.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button16.getTransforms().add(rotation);
-                buttons.add(button16);
-                rootPane.getChildren().add(button16);
-        
+        button16.getTransforms().add(rotation);
+        buttons.add(button16);
+        rootPane.getChildren().add(button16);
+
         //        17
-                Button button17 = new Button();
-                button17.setMinSize(15, 20);
-                button17.setLayoutX(803);
-                button17.setLayoutY(420);
-        
+        Button button17 = new Button();
+        button17.setMinSize(15, 20);
+        button17.setLayoutX(803);
+        button17.setLayoutY(420);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button17.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button17.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button17.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button17.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button17.getTransforms().add(rotation);
-                buttons.add(button17);
-                rootPane.getChildren().add(button17);
-        
+        button17.getTransforms().add(rotation);
+        buttons.add(button17);
+        rootPane.getChildren().add(button17);
+
         //        18
-                Button button18 = new Button();
-                button18.setMinSize(15, 20);
-                button18.setLayoutX(822);
-                button18.setLayoutY(454);
-        
+        Button button18 = new Button();
+        button18.setMinSize(15, 20);
+        button18.setLayoutX(822);
+        button18.setLayoutY(454);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button18.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button18.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button18.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button18.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button18.getTransforms().add(rotation);
-                buttons.add(button18);
-                rootPane.getChildren().add(button18);
-        
+        button18.getTransforms().add(rotation);
+        buttons.add(button18);
+        rootPane.getChildren().add(button18);
+
         //        19
-                Button button19 = new Button();
-                button19.setMinSize(15, 20);
-                button19.setLayoutX(803);
-                button19.setLayoutY(491);
-        
+        Button button19 = new Button();
+        button19.setMinSize(15, 20);
+        button19.setLayoutX(803);
+        button19.setLayoutY(491);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button19.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button19.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button19.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button19.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button19.getTransforms().add(rotation);
-                buttons.add(button19);
-                rootPane.getChildren().add(button19);
-        
+        button19.getTransforms().add(rotation);
+        buttons.add(button19);
+        rootPane.getChildren().add(button19);
+
         //        20 ------------
-                Button button20 = new Button();
-                button20.setMinSize(15, 20);
-                button20.setLayoutX(787);
-                button20.setLayoutY(516);
-        
+        Button button20 = new Button();
+        button20.setMinSize(15, 20);
+        button20.setLayoutX(787);
+        button20.setLayoutY(516);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button20.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button20.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button20.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button20.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button20.getTransforms().add(rotation);
-                buttons.add(button20);
-                rootPane.getChildren().add(button20);
-        
+        button20.getTransforms().add(rotation);
+        buttons.add(button20);
+        rootPane.getChildren().add(button20);
+
         //        21
-                Button button21 = new Button();
-                button21.setMinSize(15, 20);
-                button21.setLayoutX(770);
-                button21.setLayoutY(549);
-        
+        Button button21 = new Button();
+        button21.setMinSize(15, 20);
+        button21.setLayoutX(770);
+        button21.setLayoutY(549);
+
         // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button21.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button21.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button21.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button21.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
         // Apply the rotation transformation to the button
-                button21.getTransforms().add(rotation);
-                buttons.add(button21);
-                rootPane.getChildren().add(button21);
-        
+        button21.getTransforms().add(rotation);
+        buttons.add(button21);
+        rootPane.getChildren().add(button21);
+
         //        22
-                Button button22 = new Button();
-                button22.setMinSize(15, 20);
-                button22.setLayoutX(753);
-                button22.setLayoutY(577);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button22.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button22.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button22.getTransforms().add(rotation);
-                buttons.add(button22);
-                rootPane.getChildren().add(button22);
-        
+        Button button22 = new Button();
+        button22.setMinSize(15, 20);
+        button22.setLayoutX(753);
+        button22.setLayoutY(577);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button22.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button22.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button22.getTransforms().add(rotation);
+        buttons.add(button22);
+        rootPane.getChildren().add(button22);
+
         //        23
-                Button button23 = new Button();
-                button23.setMinSize(15, 20);
-                button23.setLayoutX(738);
-                button23.setLayoutY(608);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button23.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button23.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button23.getTransforms().add(rotation);
-                buttons.add(button23);
-                rootPane.getChildren().add(button23);
-        
+        Button button23 = new Button();
+        button23.setMinSize(15, 20);
+        button23.setLayoutX(738);
+        button23.setLayoutY(608);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button23.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button23.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button23.getTransforms().add(rotation);
+        buttons.add(button23);
+        rootPane.getChildren().add(button23);
+
         //        24
-                Button button24 = new Button();
-                button24.setMinSize(15, 20);
-                button24.setLayoutX(718);
-                button24.setLayoutY(636);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button24.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button24.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button24.getTransforms().add(rotation);
-                buttons.add(button24);
-                rootPane.getChildren().add(button24);
-        
+        Button button24 = new Button();
+        button24.setMinSize(15, 20);
+        button24.setLayoutX(718);
+        button24.setLayoutY(636);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button24.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button24.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button24.getTransforms().add(rotation);
+        buttons.add(button24);
+        rootPane.getChildren().add(button24);
+
         //        25
-                Button button25 = new Button();
-                button25.setMinSize(15, 20);
-                button25.setLayoutX(703);
-                button25.setLayoutY(668);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button25.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button25.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button25.getTransforms().add(rotation);
-                buttons.add(button25);
-                rootPane.getChildren().add(button25);
-        
+        Button button25 = new Button();
+        button25.setMinSize(15, 20);
+        button25.setLayoutX(703);
+        button25.setLayoutY(668);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button25.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button25.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button25.getTransforms().add(rotation);
+        buttons.add(button25);
+        rootPane.getChildren().add(button25);
+
         //        26
-                Button button26 = new Button();
-                button26.setMinSize(15, 20);
-                button26.setLayoutX(684);
-                button26.setLayoutY(696);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button26.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button26.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button26.getTransforms().add(rotation);
-                buttons.add(button26);
-                rootPane.getChildren().add(button26);
-        
+        Button button26 = new Button();
+        button26.setMinSize(15, 20);
+        button26.setLayoutX(684);
+        button26.setLayoutY(696);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button26.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button26.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button26.getTransforms().add(rotation);
+        buttons.add(button26);
+        rootPane.getChildren().add(button26);
+
         //        27
-                Button button27 = new Button();
-                button27.setMinSize(15, 20);
-                button27.setLayoutX(668);
-                button27.setLayoutY(727);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button27.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button27.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button27.getTransforms().add(rotation);
-                buttons.add(button27);
-                rootPane.getChildren().add(button27);
-        
+        Button button27 = new Button();
+        button27.setMinSize(15, 20);
+        button27.setLayoutX(668);
+        button27.setLayoutY(727);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button27.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button27.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button27.getTransforms().add(rotation);
+        buttons.add(button27);
+        rootPane.getChildren().add(button27);
+
         //        28
-                Button button28 = new Button();
-                button28.setMinSize(15, 20);
-                button28.setLayoutX(625);
-                button28.setLayoutY(734);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button28.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button28.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button28.getTransforms().add(rotation);
-                buttons.add(button28);
-                rootPane.getChildren().add(button28);
-        
+        Button button28 = new Button();
+        button28.setMinSize(15, 20);
+        button28.setLayoutX(625);
+        button28.setLayoutY(734);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button28.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button28.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button28.getTransforms().add(rotation);
+        buttons.add(button28);
+        rootPane.getChildren().add(button28);
+
         //        29
-                Button button29 = new Button();
-                button29.setMinSize(15, 20);
-                button29.setLayoutX(598);
-                button29.setLayoutY(729);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button29.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button29.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button29.getTransforms().add(rotation);
-                buttons.add(button29);
-                rootPane.getChildren().add(button29);
-        
+        Button button29 = new Button();
+        button29.setMinSize(15, 20);
+        button29.setLayoutX(598);
+        button29.setLayoutY(729);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button29.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button29.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button29.getTransforms().add(rotation);
+        buttons.add(button29);
+        rootPane.getChildren().add(button29);
+
         //        30
-                Button button30 = new Button();
-                button30.setMinSize(15, 20);
-                button30.setLayoutX(553);
-                button30.setLayoutY(731);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button30.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button30.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button30.getTransforms().add(rotation);
-                buttons.add(button30);
-                rootPane.getChildren().add(button30);
-        
+        Button button30 = new Button();
+        button30.setMinSize(15, 20);
+        button30.setLayoutX(553);
+        button30.setLayoutY(731);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button30.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button30.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button30.getTransforms().add(rotation);
+        buttons.add(button30);
+        rootPane.getChildren().add(button30);
+
         //        31
-                Button button31 = new Button();
-                button31.setMinSize(15, 20);
-                button31.setLayoutX(528);
-                button31.setLayoutY(730);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button31.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button31.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button31.getTransforms().add(rotation);
-                buttons.add(button31);
-                rootPane.getChildren().add(button31);
-        
+        Button button31 = new Button();
+        button31.setMinSize(15, 20);
+        button31.setLayoutX(528);
+        button31.setLayoutY(730);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button31.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button31.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button31.getTransforms().add(rotation);
+        buttons.add(button31);
+        rootPane.getChildren().add(button31);
+
         //        32
-                Button button32 = new Button();
-                button32.setMinSize(15, 20);
-                button32.setLayoutX(487);
-                button32.setLayoutY(733);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button32.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button32.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button32.getTransforms().add(rotation);
-                buttons.add(button32);
-                rootPane.getChildren().add(button32);
-        
+        Button button32 = new Button();
+        button32.setMinSize(15, 20);
+        button32.setLayoutX(487);
+        button32.setLayoutY(733);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button32.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button32.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button32.getTransforms().add(rotation);
+        buttons.add(button32);
+        rootPane.getChildren().add(button32);
+
         //        33
-                Button button33 = new Button();
-                button33.setMinSize(15, 20);
-                button33.setLayoutX(458);
-                button33.setLayoutY(730);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button33.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button33.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button33.getTransforms().add(rotation);
-                buttons.add(button33);
-                rootPane.getChildren().add(button33);
-        
+        Button button33 = new Button();
+        button33.setMinSize(15, 20);
+        button33.setLayoutX(458);
+        button33.setLayoutY(730);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button33.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button33.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button33.getTransforms().add(rotation);
+        buttons.add(button33);
+        rootPane.getChildren().add(button33);
+
         //        34
-                Button button34 = new Button();
-                button34.setMinSize(15, 20);
-                button34.setLayoutX(418);
-                button34.setLayoutY(732);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button34.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button34.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button34.getTransforms().add(rotation);
-                buttons.add(button34);
-                rootPane.getChildren().add(button34);
-        
+        Button button34 = new Button();
+        button34.setMinSize(15, 20);
+        button34.setLayoutX(418);
+        button34.setLayoutY(732);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button34.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button34.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button34.getTransforms().add(rotation);
+        buttons.add(button34);
+        rootPane.getChildren().add(button34);
+
         //        35
-                Button button35 = new Button();
-                button35.setMinSize(15, 20);
-                button35.setLayoutX(390);
-                button35.setLayoutY(730);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button35.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button35.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button35.getTransforms().add(rotation);
-                buttons.add(button35);
-                rootPane.getChildren().add(button35);
-        
+        Button button35 = new Button();
+        button35.setMinSize(15, 20);
+        button35.setLayoutX(390);
+        button35.setLayoutY(730);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button35.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button35.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button35.getTransforms().add(rotation);
+        buttons.add(button35);
+        rootPane.getChildren().add(button35);
+
         //        36
-                Button button36 = new Button();
-                button36.setMinSize(15, 20);
-                button36.setLayoutX(345);
-                button36.setLayoutY(731);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button36.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button36.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button36.getTransforms().add(rotation);
-                buttons.add(button36);
-                rootPane.getChildren().add(button36);
-        
+        Button button36 = new Button();
+        button36.setMinSize(15, 20);
+        button36.setLayoutX(345);
+        button36.setLayoutY(731);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button36.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button36.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button36.getTransforms().add(rotation);
+        buttons.add(button36);
+        rootPane.getChildren().add(button36);
+
         //        37
-                Button button37 = new Button();
-                button37.setMinSize(15, 20);
-                button37.setLayoutX(322);
-                button37.setLayoutY(694);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button37.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button37.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button37.getTransforms().add(rotation);
-                buttons.add(button37);
-                rootPane.getChildren().add(button37);
-        
+        Button button37 = new Button();
+        button37.setMinSize(15, 20);
+        button37.setLayoutX(322);
+        button37.setLayoutY(694);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button37.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button37.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button37.getTransforms().add(rotation);
+        buttons.add(button37);
+        rootPane.getChildren().add(button37);
+
         //        38
-                Button button38 = new Button();
-                button38.setMinSize(15, 20);
-                button38.setLayoutX(308);
-                button38.setLayoutY(670);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button38.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button38.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button38.getTransforms().add(rotation);
-                buttons.add(button38);
-                rootPane.getChildren().add(button38);
-        
+        Button button38 = new Button();
+        button38.setMinSize(15, 20);
+        button38.setLayoutX(308);
+        button38.setLayoutY(670);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button38.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button38.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button38.getTransforms().add(rotation);
+        buttons.add(button38);
+        rootPane.getChildren().add(button38);
+
         //        39
-                Button button39 = new Button();
-                button39.setMinSize(15, 20);
-                button39.setLayoutX(288);
-                button39.setLayoutY(633);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button39.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button39.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button39.getTransforms().add(rotation);
-                buttons.add(button39);
-                rootPane.getChildren().add(button39);
-        
+        Button button39 = new Button();
+        button39.setMinSize(15, 20);
+        button39.setLayoutX(288);
+        button39.setLayoutY(633);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button39.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button39.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button39.getTransforms().add(rotation);
+        buttons.add(button39);
+        rootPane.getChildren().add(button39);
+
         //        40
-                Button button40 = new Button();
-                button40.setMinSize(15, 20);
-                button40.setLayoutX(272);
-                button40.setLayoutY(610);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button40.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button40.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button40.getTransforms().add(rotation);
-                buttons.add(button40);
-                rootPane.getChildren().add(button40);
-        
+        Button button40 = new Button();
+        button40.setMinSize(15, 20);
+        button40.setLayoutX(272);
+        button40.setLayoutY(610);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button40.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button40.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button40.getTransforms().add(rotation);
+        buttons.add(button40);
+        rootPane.getChildren().add(button40);
+
         //        41
-                Button button41 = new Button();
-                button41.setMinSize(15, 20);
-                button41.setLayoutX(252);
-                button41.setLayoutY(574);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button41.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button41.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button41.getTransforms().add(rotation);
-                buttons.add(button41);
-                rootPane.getChildren().add(button41);
-        
+        Button button41 = new Button();
+        button41.setMinSize(15, 20);
+        button41.setLayoutX(252);
+        button41.setLayoutY(574);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button41.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button41.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button41.getTransforms().add(rotation);
+        buttons.add(button41);
+        rootPane.getChildren().add(button41);
+
         //        42
-                Button button42 = new Button();
-                button42.setMinSize(15, 20);
-                button42.setLayoutX(244);
-                button42.setLayoutY(552);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button42.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button42.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button42.getTransforms().add(rotation);
-                buttons.add(button42);
-                rootPane.getChildren().add(button42);
-        
+        Button button42 = new Button();
+        button42.setMinSize(15, 20);
+        button42.setLayoutX(244);
+        button42.setLayoutY(552);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button42.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button42.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button42.getTransforms().add(rotation);
+        buttons.add(button42);
+        rootPane.getChildren().add(button42);
+
         //        43
-                Button button43 = new Button();
-                button43.setMinSize(15, 20);
-                button43.setLayoutX(219);
-                button43.setLayoutY(512);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button43.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button43.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button43.getTransforms().add(rotation);
-                buttons.add(button43);
-                rootPane.getChildren().add(button43);
-        
+        Button button43 = new Button();
+        button43.setMinSize(15, 20);
+        button43.setLayoutX(219);
+        button43.setLayoutY(512);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button43.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button43.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button43.getTransforms().add(rotation);
+        buttons.add(button43);
+        rootPane.getChildren().add(button43);
+
         //        44
-                Button button44 = new Button();
-                button44.setMinSize(15, 20);
-                button44.setLayoutX(208);
-                button44.setLayoutY(492);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(120); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button44.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button44.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button44.getTransforms().add(rotation);
-                buttons.add(button44);
-                rootPane.getChildren().add(button44);
-        
+        Button button44 = new Button();
+        button44.setMinSize(15, 20);
+        button44.setLayoutX(208);
+        button44.setLayoutY(492);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(120); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button44.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button44.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button44.getTransforms().add(rotation);
+        buttons.add(button44);
+        rootPane.getChildren().add(button44);
+
         //        45
-                Button button45 = new Button();
-                button45.setMinSize(15, 20);
-                button45.setLayoutX(184);
-                button45.setLayoutY(456);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button45.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button45.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button45.getTransforms().add(rotation);
-                buttons.add(button45);
-                rootPane.getChildren().add(button45);
-        
+        Button button45 = new Button();
+        button45.setMinSize(15, 20);
+        button45.setLayoutX(184);
+        button45.setLayoutY(456);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button45.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button45.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button45.getTransforms().add(rotation);
+        buttons.add(button45);
+        rootPane.getChildren().add(button45);
+
         //        46
-                Button button46 = new Button();
-                button46.setMinSize(15, 20);
-                button46.setLayoutX(208);
-                button46.setLayoutY(416);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button46.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button46.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button46.getTransforms().add(rotation);
-                buttons.add(button46);
-                rootPane.getChildren().add(button46);
-        
+        Button button46 = new Button();
+        button46.setMinSize(15, 20);
+        button46.setLayoutX(208);
+        button46.setLayoutY(416);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button46.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button46.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button46.getTransforms().add(rotation);
+        buttons.add(button46);
+        rootPane.getChildren().add(button46);
+
         //        47
-                Button button47 = new Button();
-                button47.setMinSize(15, 20);
-                button47.setLayoutX(218);
-                button47.setLayoutY(393);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button47.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button47.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button47.getTransforms().add(rotation);
-                buttons.add(button47);
-                rootPane.getChildren().add(button47);
-        
+        Button button47 = new Button();
+        button47.setMinSize(15, 20);
+        button47.setLayoutX(218);
+        button47.setLayoutY(393);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button47.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button47.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button47.getTransforms().add(rotation);
+        buttons.add(button47);
+        rootPane.getChildren().add(button47);
+
         //        48
-                Button button48 = new Button();
-                button48.setMinSize(15, 20);
-                button48.setLayoutX(240);
-                button48.setLayoutY(357);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button48.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button48.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button48.getTransforms().add(rotation);
-                buttons.add(button48);
-                rootPane.getChildren().add(button48);
-        
+        Button button48 = new Button();
+        button48.setMinSize(15, 20);
+        button48.setLayoutX(240);
+        button48.setLayoutY(357);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button48.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button48.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button48.getTransforms().add(rotation);
+        buttons.add(button48);
+        rootPane.getChildren().add(button48);
+
         //        49
-                Button button49 = new Button();
-                button49.setMinSize(15, 20);
-                button49.setLayoutX(253);
-                button49.setLayoutY(333);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button49.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button49.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button49.getTransforms().add(rotation);
-                buttons.add(button49);
-                rootPane.getChildren().add(button49);
-        
+        Button button49 = new Button();
+        button49.setMinSize(15, 20);
+        button49.setLayoutX(253);
+        button49.setLayoutY(333);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button49.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button49.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button49.getTransforms().add(rotation);
+        buttons.add(button49);
+        rootPane.getChildren().add(button49);
+
         //        50
-                Button button50 = new Button();
-                button50.setMinSize(15, 20);
-                button50.setLayoutX(278);
-                button50.setLayoutY(297);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button50.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button50.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button50.getTransforms().add(rotation);
-                buttons.add(button50);
-                rootPane.getChildren().add(button50);
-        
+        Button button50 = new Button();
+        button50.setMinSize(15, 20);
+        button50.setLayoutX(278);
+        button50.setLayoutY(297);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button50.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button50.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button50.getTransforms().add(rotation);
+        buttons.add(button50);
+        rootPane.getChildren().add(button50);
+
         //        51
-                Button button51 = new Button();
-                button51.setMinSize(15, 20);
-                button51.setLayoutX(289);
-                button51.setLayoutY(274);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button51.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button51.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button51.getTransforms().add(rotation);
-                buttons.add(button51);
-                rootPane.getChildren().add(button51);
-        
+        Button button51 = new Button();
+        button51.setMinSize(15, 20);
+        button51.setLayoutX(289);
+        button51.setLayoutY(274);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button51.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button51.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button51.getTransforms().add(rotation);
+        buttons.add(button51);
+        rootPane.getChildren().add(button51);
+
         //        52 -----------
-                Button button52 = new Button();
-                button52.setMinSize(15, 20);
-                button52.setLayoutX(312);
-                button52.setLayoutY(237);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(60); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button52.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button52.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button52.getTransforms().add(rotation);
-                buttons.add(button52);
-                rootPane.getChildren().add(button52);
-        
+        Button button52 = new Button();
+        button52.setMinSize(15, 20);
+        button52.setLayoutX(312);
+        button52.setLayoutY(237);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(60); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button52.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button52.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button52.getTransforms().add(rotation);
+        buttons.add(button52);
+        rootPane.getChildren().add(button52);
+
         //        53
-                Button button53 = new Button();
-                button53.setMinSize(15, 20);
-                button53.setLayoutX(322);
-                button53.setLayoutY(215);
-        
-                // Create a Rotate transformation
-                rotation = new Rotate();
-                rotation.setAngle(0); // Set the angle of rotation (in degrees)
-                rotation.setPivotX(button53.getMinWidth() / 2); // Set the pivot point X (center of the button)
-                rotation.setPivotY(button53.getMinHeight() / 2); // Set the pivot point Y (center of the button)
-        
-                // Apply the rotation transformation to the button
-                button53.getTransforms().add(rotation);
-                buttons.add(button53);
-                rootPane.getChildren().add(button53);
-        
-        
-            } // End of method Set-Ray buttons
+        Button button53 = new Button();
+        button53.setMinSize(15, 20);
+        button53.setLayoutX(322);
+        button53.setLayoutY(215);
+
+        // Create a Rotate transformation
+        rotation = new Rotate();
+        rotation.setAngle(0); // Set the angle of rotation (in degrees)
+        rotation.setPivotX(button53.getMinWidth() / 2); // Set the pivot point X (center of the button)
+        rotation.setPivotY(button53.getMinHeight() / 2); // Set the pivot point Y (center of the button)
+
+        // Apply the rotation transformation to the button
+        button53.getTransforms().add(rotation);
+        buttons.add(button53);
+        rootPane.getChildren().add(button53);
+
+
+    } // End of method Set-Ray buttons
 
 }

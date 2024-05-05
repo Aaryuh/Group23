@@ -1,41 +1,41 @@
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class Board {
 
-    //Array to hold individual cells on the board
     public Cell[] cells;
 
-    //Constructor to initialize the board with 61 cells and set it up
     public Board() {
         cells = new Cell[61];
-        addCells();   //method to add individual cells to the board
-        makeBoard();  //method to set up the board configuration
+        addCells();
+        makeBoard();
+//        ----- New Addition
+        setAllCellsEmpty();
     }
 
-    //Add individual cells to the board
-    public void addCells() {
+    public void setAllCellsEmpty(){
+        for(Cell dummy: cells){
+            dummy.setCell_situation(Cell.situation.EMPTY);
+        }
+    }
+
+    private void addCells() {
         for (int i = 0; i < cells.length; i++) {
             cells[i] = new Cell();
             cells[i].setCellNumber(i);
         }
     }
 
-
-    private void makeBoard() {
-        //arrayList containing the cells with their specific neighbour
+    private void makeBoard(){
         ArrayList<Cell> dummy = new ArrayList<>();
-
         //     ------------------0------------------
-        dummy.add(null);
-        dummy.add(cells[1]);
-        dummy.add(cells[6]);
-        dummy.add(cells[5]);
-        dummy.add(null);
-        dummy.add(null);
+        dummy.add(null); // TR
+        dummy.add(cells[1]); // R
+        dummy.add(cells[6]); // BR
+        dummy.add(cells[5]); // BL
+        dummy.add(null); // L
+        dummy.add(null); // TL
         cells[0].setNeighbour_cells(new ArrayList<>(dummy));
         dummy.clear();
-
         //        ---------------1-------------------
         dummy.add(null);
         dummy.add(cells[2]);
@@ -55,7 +55,6 @@ public class Board {
         dummy.add(null);
         cells[2].setNeighbour_cells(new ArrayList<>(dummy));
         dummy.clear();
-
         //        ---------------3-------------------
         dummy.add(null);
         dummy.add(cells[4]);
@@ -65,7 +64,6 @@ public class Board {
         dummy.add(null);
         cells[3].setNeighbour_cells(new ArrayList<>(dummy));
         dummy.clear();
-
         //        ---------------4-------------------
         dummy.add(null);
         dummy.add(null);
@@ -641,17 +639,6 @@ public class Board {
     }
 
     public static void main(String[] args) {
-        Board test = new Board();
-        for(int i = 0; i < 61; i++){
-            for (Cell dummy : test.cells[i].getNeighbour_cells()) {
-                if(dummy != null){
-                    System.out.print(dummy.getCellNumber() + " ");
-                }
-                else{
-                    System.out.print(null + " ");
-                }
-            }
-            System.out.println();
-        }
+
     }
 }
